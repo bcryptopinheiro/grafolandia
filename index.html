@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Jogo para estudar grafos de MACS 11.º ano: Euler, Fleury, carteiro chinês, Hamilton e caixeiro-viajante.">
+<meta name="theme-color" content="#f3f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#11161b" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Grafolândia">
+<!-- PWA: manifest e ícones -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+img{max-width:100%}[hidden]{display:none!important}
+button,.opt,.btn,.back,.hintbtn{min-height:44px;touch-action:manipulation}
+input.num{font-size:max(16px,1.3rem)}
+</style>
+<title>Grafolândia MACS</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Figtree:wght@400;600;700&display=swap">
+<style>
+/* Layout: mapa de metro — cada mundo é uma linha colorida com estações; ecrã de jogo numa coluna estreita */
+:root{
+  --bg:#f3f5f1; --surface:#ffffff; --ink:#17222c; --muted:#5d6a73; --line:#d9ded8; --edge:#9aa6ad;
+  --l1:#1f6fd1; --l2:#169457; --l3:#c98a00; --l4:#c2367a; --l5:#6a4bd1; --l6:#0b8486; --l7:#c4571b;
+  --ok:#169457; --okbg:#e3f5ea; --bad:#c9373b; --badbg:#fbe6e6; --tipbg:#fff6d6; --tipink:#6b5200;
+  --display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#11161b; --surface:#1a222a; --ink:#e8edf0; --muted:#9aa8b1; --line:#2b3640; --edge:#5f6d77;
+  --l1:#5b9cff; --l2:#3cc786; --l3:#f0b52a; --l4:#ec6aa8; --l5:#9d86ff; --l6:#3ccbcb; --l7:#ff9a5c;
+  --ok:#3cc786; --okbg:#173326; --bad:#ff6b6e; --badbg:#3a1c1e; --tipbg:#33290c; --tipink:#f5d77a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161b; --surface:#1a222a; --ink:#e8edf0; --muted:#9aa8b1; --line:#2b3640; --edge:#5f6d77;
+  --l1:#5b9cff; --l2:#3cc786; --l3:#f0b52a; --l4:#ec6aa8; --l5:#9d86ff; --l6:#3ccbcb; --l7:#ff9a5c;
+  --ok:#3cc786; --okbg:#173326; --bad:#ff6b6e; --badbg:#3a1c1e; --tipbg:#33290c; --tipink:#f5d77a; color-scheme:dark}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:12px 40px}
+.app{max-width:560px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--wc,var(--l1));outline-offset:2px}
+
+/* HOME */
+.hero{display:grid;gap:6px;padding-block:18px 8px}
+.hero h1{font-size:2.4rem;font-weight:700;letter-spacing:-.01em}
+.hero h1 span{color:var(--l1)}
+.hero p{margin:0;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{font-size:.82rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.metro{position:relative;margin-top:22px;display:grid;gap:4px}
+.metro::before{content:"";position:absolute;left:23px;top:24px;bottom:24px;width:8px;border-radius:4px;
+  background:linear-gradient(var(--l1),var(--l2),var(--l3),var(--l4),var(--l6),var(--l5),var(--l7))}
+.station{position:relative;display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:10px;
+  background:none;border:0;text-align:left;padding:10px 0}
+.dot{width:40px;height:40px;margin-left:7px;border-radius:50%;background:var(--surface);border:6px solid var(--c);
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;color:var(--c);position:relative;z-index:1}
+.station:hover .dot{transform:scale(1.08)}
+.st-name{font-family:var(--display);font-weight:600;font-size:1.15rem}
+.st-sub{font-size:.88rem;color:var(--muted);display:block}
+.stars{font-size:1rem;letter-spacing:2px;color:var(--l3);white-space:nowrap}
+.stars .off{color:var(--line)}
+.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:700;background:var(--wc,var(--l1));color:#fff}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:default}
+.foot{margin-top:28px;font-size:.8rem;color:var(--muted)}
+
+/* WORLD */
+.top{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5}
+.back{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:40px;height:40px;font-size:1.2rem}
+.bar{height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--wc);transition:width .3s}
+.hearts{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lv{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:99px;font-size:.7rem;letter-spacing:.04em;vertical-align:1px}
+.lv1{background:var(--okbg);color:var(--ok)} .lv2{background:var(--tipbg);color:var(--tipink)} .lv3{background:var(--badbg);color:var(--bad)}
+.enun{background:var(--bg);border-left:5px solid var(--wc);border-radius:10px;padding:10px 12px;font-size:.95rem}
+.enun b:first-child{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--wc)}
+.wtag{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--wc);margin-top:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:8px;display:grid;gap:12px}
+.card h2{font-size:1.45rem}
+.card p{margin:0}
+.card ul{margin:0;padding-left:20px;display:grid;gap:4px}
+.big{font-family:var(--display);font-size:1.15rem;font-weight:600;background:var(--bg);border-radius:12px;padding:10px 12px;text-align:center}
+.tip{background:var(--tipbg);color:var(--tipink);border-radius:12px;padding:10px 12px;font-size:.95rem}
+.tip b:first-child{display:block;font-family:var(--display);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.exam{border:2px dashed var(--wc);border-radius:12px;padding:10px 12px;font-size:.93rem}
+.exam b:first-child{color:var(--wc)}
+.gwrap{background:var(--bg);border-radius:14px;overflow:hidden}
+svg.g{display:block;width:100%;height:auto;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.opts{display:grid;gap:8px}
+.opt{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:12px 14px;text-align:left;font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--wc)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg);text-decoration:line-through;opacity:.75}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.num{flex:1;min-width:0;font:inherit;font-size:1.3rem;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+.fb{border-radius:14px;padding:12px 14px;font-size:.95rem}
+.fb.ok{background:var(--okbg)} .fb.bad{background:var(--badbg)}
+.fb b:first-child{font-family:var(--display);font-size:1.05rem;display:block}
+.pathline{font-family:var(--display);font-weight:600;font-size:1.05rem;min-height:1.6em;word-break:break-word}
+.small{font-size:.85rem;color:var(--muted)}
+.hintbtn{background:none;border:0;color:var(--tipink);background:var(--tipbg);border-radius:99px;padding:6px 12px;font-weight:700;font-size:.88rem;justify-self:start}
+.next{width:100%;margin-top:4px}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.end{text-align:center;padding-block:30px;display:grid;gap:14px;justify-items:center}
+.end .bigstars{font-size:3rem;letter-spacing:6px;color:var(--l3)}
+.end .bigstars .off{color:var(--line)}
+/* Cábula */
+.sheet{display:grid;gap:12px;margin-top:12px}
+.sheet section{background:var(--surface);border:1px solid var(--line);border-left:8px solid var(--c);border-radius:14px;padding:14px 16px}
+.sheet h3{font-size:1.1rem;margin-bottom:6px;color:var(--c)}
+.sheet ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.95rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* Acréscimos para telemóvel (não mudam o design) */
+.back{min-width:44px;min-height:44px}
+/* Safe areas laterais (iPhone deitado, com notch) */
+body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+/* A barra fixa do topo tapa também a zona do notch, para o texto não aparecer por trás dele */
+.top{box-shadow:0 calc(-1 * env(safe-area-inset-top,0px)) 0 var(--bg)}
+</style>
+
+</head>
+<body>
+<main class="app" id="app"></main>
+
+<script>
+const KEY='grafolandia-macs11-v1';
+let save; try{save=JSON.parse(localStorage.getItem(KEY))}catch(e){} if(!save) save={stars:{},xp:0};
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+/* ---------- GRAFOS ---------- */
+const G={
+ basic:{v:{A:[50,45],B:[150,30],C:[255,60],D:[215,165],E:[75,150]},e:[['A','B'],['B','C'],['C','D'],['D','E'],['E','A'],['B','D'],['E','E']],loopDir:1,h:235},
+ bridge:{v:{A:[35,45],B:[35,175],C:[115,110],D:[190,110],E:[270,45],F:[270,175]},e:[['A','B'],['B','C'],['C','A'],['C','D'],['D','E'],['E','F'],['F','D']]},
+ kon:{v:{N:[150,30],I:[115,118],S:[150,205],L:[265,118]},e:[['N','I'],['N','I'],['S','I'],['S','I'],['N','L'],['S','L'],['I','L']]},
+ bowtie:{v:{A:[40,40],B:[40,180],C:[150,110],D:[260,40],E:[260,180]},e:[['A','B'],['B','C'],['C','A'],['C','D'],['D','E'],['E','C']]},
+ house:{v:{E:[150,22],A:[75,85],B:[225,85],D:[75,200],C:[225,200]},e:[['A','B'],['B','C'],['C','D'],['D','A'],['A','E'],['E','B'],['A','C'],['B','D']]},
+ sqd:{v:{A:[60,40],B:[240,40],C:[240,180],D:[60,180]},e:[['A','B'],['B','C'],['C','D'],['D','A'],['A','C']]},
+ k4:{v:{A:[60,40],B:[240,40],C:[240,180],D:[60,180]},e:[['A','B'],['B','C'],['C','D'],['D','A'],['A','C'],['B','D']]},
+ post:{v:{A:[60,40],B:[240,40],C:[240,180],D:[60,180]},e:[['A','B',3],['B','C',4],['C','D',3],['D','A',4],['A','C',5,.5]]},
+ ham:{v:{A:[150,25],B:[270,100],C:[225,205],D:[75,205],E:[30,100],F:[150,125]},e:[['A','B'],['B','C'],['C','D'],['D','E'],['E','A'],['F','A'],['F','C'],['F','D']]},
+ k5:{v:{A:[150,22],B:[275,105],C:[228,205],D:[72,205],E:[25,105]},e:[['A','B',4],['A','C',7,.3],['A','D',3,.3],['A','E',9],['B','C',5],['B','D',6,.3],['B','E',8,.3],['C','D',10],['C','E',2,.3],['D','E',11]]},
+ post2:{v:{A:[60,40],B:[240,40],C:[240,180],D:[60,180]},e:[['A','B',2],['B','C',3],['C','D',2],['D','A',3],['B','D',6,.5]]},
+ fichaII:{v:{A:[70,45],B:[235,60],C:[70,185],D:[155,120]},e:[['A','D'],['B','D'],['C','D'],['A','A'],['B','B'],['C','C']],ld:{A:[-1,-.7],B:[1,-.7],C:[-1,.7]}},
+ fich:{v:{A:[40,40],B:[200,70],C:[220,195],D:[40,190],E:[125,120],F:[180,22],G:[275,140]},e:[['A','D'],['A','E'],['D','E'],['D','C'],['E','B'],['E','C'],['B','C'],['B','F'],['B','G']]},
+ museu:{v:{A:[55,45],B:[245,45],C:[245,175],D:[55,175],E:[150,215]},e:[['A','B'],['A','B'],['B','C'],['C','D'],['D','A'],['B','D'],['C','E'],['E','D']],h:235},
+ grid:{v:{A:[50,30],B:[150,30],C:[250,30],D:[50,115],E:[150,115],F:[250,115],G:[50,200],H:[150,200],I:[250,200]},e:[['A','B'],['B','C'],['D','E'],['E','F'],['G','H'],['H','I'],['A','D'],['D','G'],['B','E'],['E','H'],['C','F'],['F','I']]},
+ tsp:{v:{P:[70,35],C:[240,50],F:[250,195],L:[55,185]},e:[['P','C',120],['L','C',205,.3],['L','F',278],['L','P',313],['C','F',438],['P','F',553,.3]]},
+ star:{v:{A:[150,30],B:[40,190],C:[260,190],D:[150,135]},e:[['A','D'],['B','D'],['C','D']]},
+};
+function deg(g,dups){const d={};Object.keys(g.v).forEach(k=>d[k]=0);g.e.forEach(([a,b])=>{d[a]++;d[b]++});(dups||[]).forEach(i=>{const[a,b]=g.e[i];d[a]++;d[b]++});return d}
+
+function geom(g){
+ const grp={};g.e.forEach((ed,i)=>{const k=[ed[0],ed[1]].sort().join('|');(grp[k]=grp[k]||[]).push(i)});
+ return g.e.map((ed,i)=>{
+  const[a,b,w,t]=ed,P=g.v[a],Q=g.v[b];
+  if(a===b){const[x,y]=P;let[ux,uy]=(g.ld&&g.ld[a])||[0,g.loopDir||-1];const L0=Math.hypot(ux,uy);ux/=L0;uy/=L0;const px=-uy,py=ux;return{d:`M${x} ${y} C${x+ux*62+px*38} ${y+uy*62+py*38} ${x+ux*62-px*38} ${y+uy*62-py*38} ${x} ${y}`,lx:x+ux*46,ly:y+uy*46,mx:x+ux*46,my:y+uy*46,nx:ux,ny:uy,loop:1}}
+  const k=[a,b].sort().join('|'),gr=grp[k],idx=gr.indexOf(i),off=(idx-(gr.length-1)/2)*34;
+  const[p,q]=a<b?[P,Q]:[Q,P];const mx=(p[0]+q[0])/2,my=(p[1]+q[1])/2,dx=q[0]-p[0],dy=q[1]-p[1],L=Math.hypot(dx,dy),nx=-dy/L,ny=dx/L;
+  if(!off){const tt=t??.5;return{d:`M${P[0]} ${P[1]} L${Q[0]} ${Q[1]}`,lx:P[0]+(Q[0]-P[0])*tt,ly:P[1]+(Q[1]-P[1])*tt,mx,my,nx,ny,p,q}}
+  return{d:`M${p[0]} ${p[1]} Q${mx+nx*off*2} ${my+ny*off*2} ${q[0]} ${q[1]}`,lx:mx+nx*off,ly:my+ny*off,mx,my,nx,ny,p,q}
+ })
+}
+function svgGraph(g,o={}){
+ const gm=geom(g),h=g.h||225,used=o.used||[],dups=o.dups||[],d=o.showDeg?deg(g,dups):null;
+ let s=`<svg class="g" viewBox="0 0 300 ${h}" role="img" aria-label="grafo">`;
+ gm.forEach((x,i)=>{
+  const cnt=used.filter(u=>u===i).length;
+  s+=`<path d="${x.d}" fill="none" stroke="${cnt?'var(--wc)':'var(--edge)'}" stroke-width="${cnt?7:4}" stroke-linecap="round"/>`;
+  if(dups.includes(i)&&!x.loop){const c=`M${x.p[0]} ${x.p[1]} Q${x.mx+x.nx*26} ${x.my+x.ny*26} ${x.q[0]} ${x.q[1]}`;s+=`<path d="${c}" fill="none" stroke="var(--bad)" stroke-width="4" stroke-dasharray="7 6" stroke-linecap="round"/>`}
+  if(o.edgeTap)s+=`<path d="${x.d}" fill="none" stroke="transparent" stroke-width="26" data-e="${i}" style="cursor:pointer"/>`;
+ });
+ gm.forEach((x,i)=>{const w=g.e[i][2];if(w!=null)s+=`<g pointer-events="none"><rect x="${x.lx-(5+String(w).length*4)}" y="${x.ly-11}" width="${10+String(w).length*8}" height="22" rx="7" fill="var(--surface)" stroke="var(--line)"/><text x="${x.lx}" y="${x.ly+5}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)" font-family="Figtree,sans-serif">${w}</text></g>`});
+ for(const[k,[x,y]]of Object.entries(g.v)){
+  const cur=o.cur===k,vis=(o.visited||[]).includes(k);
+  s+=`<g data-v="${k}" style="cursor:${o.tap?'pointer':'default'}"${o.edgeTap?' pointer-events="none"':''}><circle cx="${x}" cy="${y}" r="${o.tap?30:24}" fill="transparent"/>`+
+   `<circle cx="${x}" cy="${y}" r="16" fill="${cur?'var(--wc)':'var(--surface)'}" stroke="var(--wc)" stroke-width="${vis?5:3}"/>`+
+   `<text x="${x}" y="${y+6}" text-anchor="middle" font-size="16" font-weight="700" fill="${cur?'#fff':'var(--ink)'}" font-family="Fredoka,sans-serif">${k}</text>`;
+  if(d){const odd=d[k]%2;s+=`<circle cx="${x+17}" cy="${y-16}" r="10" fill="${odd?'var(--bad)':'var(--ok)'}"/><text x="${x+17}" y="${y-11.5}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Figtree,sans-serif">${d[k]}</text>`}
+  s+='</g>';
+ }
+ return s+'</svg>';
+}
+
+/* ---------- CONTEÚDO ---------- */
+const W=[
+{id:'w1',c:'--l1',name:'Linha Azul',title:'Noções básicas de grafos',steps:[
+ {t:'learn',title:'O que é um grafo?',g:'basic',body:`<p>Imagina um mapa com <b>cidades</b> e <b>estradas</b>. Um grafo é só isso: pontinhos ligados por linhas.</p>
+ <ul><li><b>Vértices</b> = os pontos (A, B, C…)</li><li><b>Arestas</b> = as linhas que os ligam</li><li><b>Ordem</b> do grafo = número de <b>vértices</b> (as arestas não contam!)</li><li><b>Adjacentes</b> = dois vértices ligados por uma aresta</li><li><b>Lacete</b> = aresta que sai e volta ao mesmo vértice (vê o E)</li><li><b>Arestas paralelas</b> = duas ou mais arestas entre os mesmos dois vértices</li><li><b>Vértice isolado</b> = grau 0; <b>vértice terminal</b> = grau 1</li></ul>`,
+ tip:'Se duas linhas se cruzam no desenho, isso <b>não</b> é um vértice! Só contam as bolinhas.'},
+ {t:'learn',title:'O grau de um vértice',g:'basic',showDeg:true,body:`<p>O <b>grau</b> é quantas pontas de arestas tocam no vértice. É como contar quantas estradas chegam a uma cidade.</p>
+ <p>O número na bolinha colorida é o grau. <b style="color:var(--bad)">Vermelho = ímpar</b>, <b style="color:var(--ok)">verde = par</b>.</p>`,
+ tip:'O <b>lacete conta 2</b> para o grau, porque toca duas vezes no vértice. O E tem grau 4: duas arestas normais + lacete (2).'},
+ {t:'num',q:'Quantas arestas tem este grafo? (o lacete também é uma aresta)',g:'basic',a:7,hint:'Conta linha a linha: AB, BC, CD, DE, EA, BD e o lacete em E.',why:'São 7 arestas. Repara: a soma dos graus (2+3+2+3+4) dá 14, que é 2 × 7.'},
+ {t:'num',q:'Um grafo tem 6 vértices e 8 arestas. Qual é a ordem do grafo?',a:6,hint:'A ordem conta os vértices, não as arestas.',why:'Ordem = número de vértices = 6.'},
+ {t:'learn',title:'O truque do aperto de mão',body:`<p>Cada aresta tem <b>duas pontas</b>, logo conta 2 vezes na soma dos graus.</p>
+ <div class="big">Soma dos graus = 2 × nº de arestas</div>
+ <p>Consequência: a soma é sempre par, por isso <b>o número de vértices de grau ímpar é sempre par</b> (0, 2, 4…).</p>`,
+ tip:'Se te pedem um grafo com graus 3, 3, 2, 1, soma: 9. É ímpar, logo esse grafo <b>não existe</b>.'},
+ {t:'num',q:'Um grafo tem 9 arestas. Quanto dá a soma dos graus de todos os vértices?',a:18,hint:'Soma dos graus = 2 × arestas.',why:'2 × 9 = 18.'},
+ {t:'mc',q:'É possível existir um grafo cujos vértices tenham graus 4, 3, 3, 2, 1?',opts:['Sim','Não, porque a soma dos graus é ímpar','Não, porque há um vértice de grau 1'],a:1,hint:'Soma os graus. O resultado tem de ser par.',why:'4+3+3+2+1 = 13, ímpar. Também se vê pelos ímpares: há três vértices de grau ímpar (3, 3, 1), e esse número tem de ser par.'},
+ {t:'learn',title:'Tipos de grafos (como na Ficha 1)',g:'k4',body:`<ul><li><b>Simples</b>: não tem lacetes nem arestas paralelas.</li>
+ <li><b>Multigrafo</b>: não é simples (tem lacetes e/ou arestas paralelas).</li>
+ <li><b>Regular</b>: todos os vértices têm o <b>mesmo grau</b>.</li>
+ <li><b>Completo</b>: é simples e cada par de vértices está ligado.</li></ul>
+ <p>Este grafo (K₄) é simples, regular (todos com grau 3) e completo.</p>`,
+ tip:'Para ver se é <b>regular</b>, escreve o grau de cada vértice: têm de ser todos iguais. Todo o grafo completo é regular, mas nem todo o regular é completo (um quadrado é regular de grau 2 e não é completo).'},
+ {t:'mc',q:'O grafo do início (com o lacete em E) é…',g:'basic',opts:['Simples e regular','Não é simples, porque tem um lacete','Completo'],a:1,hint:'Procura lacetes ou arestas paralelas.',why:'Tem um lacete em E, por isso não é simples. Também não é regular: os graus são 2, 3, 2, 3 e 4.'},
+ {t:'mc',q:'Um quadrado A–B–C–D–A (sem diagonais) é…',opts:['Regular, mas não completo','Completo','Nem regular nem completo'],a:0,hint:'Calcula os graus. Depois vê se A está ligado a C.',why:'Todos têm grau 2, por isso é regular. Não é completo: A e C não estão ligados.'},
+ {t:'learn',title:'Conexo, completo e ponte',g:'bridge',body:`<ul><li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro (está tudo "num só bocado").</li>
+ <li><b>Completo</b>: todos os vértices estão ligados a todos. Com n vértices chama-se <b>Kₙ</b>.</li>
+ <li><b>Ponte</b>: aresta que, se a apagares, o grafo parte-se em dois. Aqui é a <b>C–D</b>.</li></ul>
+ <div class="big">Kₙ tem n × (n − 1) ÷ 2 arestas</div>`,
+ tip:'Para K₅: 5 × 4 ÷ 2 = 10 arestas. Cada vértice tem grau n − 1.'},
+ {t:'mc',q:'Neste grafo, qual destas arestas é uma ponte?',g:'bridge',opts:['A–B','C–D','D–E','B–C'],a:1,hint:'Imagina que tiras a aresta. O grafo fica separado em dois bocados?',why:'Sem C–D, o triângulo ABC fica separado do triângulo DEF.'},
+ {t:'num',q:'Quantas arestas tem o grafo completo K₆?',a:15,hint:'n × (n − 1) ÷ 2, com n = 6.',why:'6 × 5 ÷ 2 = 15.'},
+ {t:'learn',title:'Passeios no grafo',body:`<ul><li><b>Passeio</b>: sequência de arestas seguidas; pode repetir tudo.</li>
+ <li><b>Trajeto</b>: passeio que <b>não repete arestas</b>.</li>
+ <li><b>Caminho</b>: passeio que <b>não repete vértices</b>.</li>
+ <li><b>Circuito</b>: trajeto que <b>começa e acaba no mesmo vértice</b>.</li></ul>`,
+ tip:'Pensa num passeio de bicicleta: trajeto = nunca passas duas vezes na mesma rua. Circuito = e ainda chegas a casa.'},
+ {t:'mc',q:'Um trajeto que começa e termina no mesmo vértice chama-se…',opts:['Caminho fechado com arestas repetidas','Circuito','Ponte','Lacete'],a:1,hint:'É a palavra para um passeio que volta a casa.',why:'Circuito = trajeto fechado.'},
+]},
+{id:'w2',c:'--l2',name:'Linha Verde',title:'Trajetos e circuitos eulerianos',steps:[
+ {t:'learn',title:'As pontes de Königsberg',g:'kon',body:`<p>Em 1736, os habitantes de Königsberg perguntavam: dá para passear pela cidade passando <b>uma só vez</b> em cada uma das 7 pontes?</p>
+ <p>Euler transformou a cidade num grafo: as zonas de terra são vértices e as pontes são arestas.</p>`,
+ tip:'Euler = <b>carteiro</b>. Quer passar por <b>todas as ruas (arestas)</b> uma única vez.'},
+ {t:'learn',title:'A regra de ouro de Euler',body:`<p>Primeiro confirma que o grafo é <b>conexo</b>. Depois conta os vértices de <b>grau ímpar</b>:</p>
+ <ul><li><b>0 ímpares</b> → há <b>circuito euleriano</b> (volta ao início)</li>
+ <li><b>2 ímpares</b> → há <b>trajeto euleriano</b>: começa num ímpar e acaba no outro</li>
+ <li><b>4 ou mais</b> → não há nenhum dos dois</li></ul>`,
+ tip:'Conta só os ímpares: <b>0 → circuito, 2 → trajeto, mais → nada</b>.',
+ exam:'<b>Como justificar no teste:</b> "O grafo é conexo e todos os vértices têm grau par, logo, pelo teorema de Euler, admite um circuito euleriano." Escreve sempre os graus de todos os vértices.'},
+ {t:'mc',q:'Königsberg: os graus são I=5, N=3, S=3, L=3. O passeio é possível?',g:'kon',opts:['Sim, é um circuito euleriano','Sim, é um trajeto euleriano','Não, há 4 vértices de grau ímpar'],a:2,hint:'Quantos vértices têm grau ímpar?',why:'Os 4 vértices têm grau ímpar. Com mais de 2 ímpares não existe trajeto nem circuito euleriano.'},
+ {t:'mc',q:'Este grafo tem…',g:'sqd',showDeg:true,opts:['Circuito euleriano','Trajeto euleriano (mas não circuito)','Nenhum'],a:1,hint:'Conta as bolinhas vermelhas.',why:'Só A e C têm grau ímpar (3). Há trajeto euleriano a começar em A e acabar em C, ou ao contrário.'},
+ {t:'mc',q:'E este (K₄)?',g:'k4',opts:['Circuito euleriano','Trajeto euleriano','Nenhum'],a:2,hint:'Em K₄ cada vértice liga-se aos outros 3.',why:'Os 4 vértices têm grau 3, ímpar. Com 4 ímpares não há nada.'},
+ {t:'trace',mode:'euler',closed:true,g:'bowtie',q:'Desenha um circuito euleriano: toca nos vértices pela ordem do percurso. Usa todas as arestas uma vez e volta ao início.',hint:'Todos os graus são pares, podes começar onde quiseres. Passa pelo C duas vezes: ele tem grau 4.',why:'Boa! Um circuito possível é A → B → C → D → E → C → A.'},
+ {t:'trace',mode:'euler',closed:false,g:'house',q:'A "casinha": desenha-a sem levantar o lápis e sem repetir linhas. Onde tens de começar?',hint:'C e D têm grau 3 (ímpar). Começa num deles e acabarás no outro.',why:'Exato. Só dá se começares num vértice ímpar (C ou D). Acabas sempre no outro ímpar.'},
+ {t:'mc',q:'Um grafo conexo tem trajeto euleriano que começa em P. Onde acaba?',opts:['Em P','No outro vértice de grau ímpar','Num vértice de grau par qualquer'],a:1,hint:'Num trajeto euleriano, quantos vértices ímpares há?',why:'Há exatamente 2 vértices ímpares: o trajeto começa num e acaba no outro.'},
+]},
+{id:'w3',c:'--l3',name:'Linha Amarela',title:'Fleury, eulerização e carteiro chinês',steps:[
+ {t:'learn',title:'Algoritmo de Fleury',g:'bridge',body:`<p>É uma receita para encontrar o circuito ou trajeto euleriano sem te perderes:</p>
+ <ul><li>1. Se houver 2 vértices ímpares, começa num deles. Se não, começa onde quiseres.</li>
+ <li>2. Cada aresta que percorres é "apagada".</li>
+ <li>3. <b>Nunca atravesses uma ponte</b> do grafo que sobra, a não ser que não haja outra opção.</li></ul>`,
+ tip:'A ponte é a última saída da ilha. Visita a ilha toda antes de a atravessar, senão ficas preso do outro lado.'},
+ {t:'mc',q:'Começas em C (grau 3). Pelo algoritmo de Fleury, qual é a primeira aresta?',g:'bridge',opts:['C–D, porque leva ao outro ímpar','C–A ou C–B','Qualquer uma, tanto faz'],a:1,hint:'Qual das três arestas é uma ponte?',why:'C–D é ponte. Se a usares já, nunca mais voltas ao triângulo ABC. Primeiro dás a volta ao triângulo.'},
+ {t:'trace',mode:'euler',closed:false,g:'bridge',q:'Agora faz o trajeto completo com Fleury, a começar em C.',start:'C',hint:'C → A → B → C → D (agora sim a ponte) → E → F → D.',why:'Perfeito. Atravessaste a ponte só quando já não havia alternativa.'},
+ {t:'learn',title:'Eulerizar um grafo',g:'k4',showDeg:true,body:`<p>Se há vértices ímpares, não há circuito. A solução é <b>duplicar arestas que já existem</b> para tornar todos os graus pares.</p>
+ <ul><li>Junta os vértices ímpares aos pares.</li><li>Liga cada par pelo caminho mais curto, duplicando essas arestas.</li><li>Tenta duplicar <b>o menor número possível</b> (ou o menor peso).</li></ul>`,
+ tip:'<b>Nunca inventes arestas novas!</b> Só podes copiar estradas que já existem. Duplicar uma aresta = passar duas vezes na mesma rua.'},
+ {t:'eulerize',g:'k4',min:2,q:'Toca nas arestas para as duplicar até todos os graus ficarem pares (verdes). Usa o mínimo possível.',hint:'São 4 ímpares: forma 2 pares. Duplica, por exemplo, A–B e C–D.',why:'Com 2 duplicações (A–B e C–D, ou A–D e B–C, ou as duas diagonais) todos os graus ficam 4.'},
+ {t:'learn',title:'O problema do carteiro chinês',g:'post',body:`<p>Um carteiro tem de passar por <b>todas as ruas</b> e voltar à estação, a andar o mínimo possível. Os números são os pesos (distâncias, tempos ou custos).</p>
+ <ul><li>1. Se todos os graus são pares, o custo é a soma dos pesos.</li>
+ <li>2. Se não, euleriza da forma <b>mais barata</b>.</li>
+ <li>3. Custo total = soma de todos os pesos + pesos das arestas duplicadas.</li></ul>`,
+ tip:'Para ligar dois ímpares, compara os caminhos possíveis e escolhe o de <b>menor peso</b>, mesmo que tenha mais arestas.'},
+ {t:'mc',q:'Neste grafo, A e C são ímpares. Qual é a eulerização mais barata?',g:'post',opts:['Duplicar A–C (peso 5)','Duplicar A–B e B–C (peso 7)','Duplicar A–D e D–C (peso 7)'],a:0,hint:'Soma os pesos de cada opção.',why:'A–C direto custa 5, menos que 3+4 = 7 ou 4+3 = 7.'},
+ {t:'num',q:'Qual é o custo total do percurso ótimo do carteiro?',g:'post',a:24,hint:'Soma todos os pesos (3+4+3+4+5) e junta o peso da aresta duplicada.',why:'19 (todas as ruas) + 5 (A–C repetida) = 24.'},
+ {t:'mc',q:'Ao eulerizar um grafo, é permitido…',opts:['Acrescentar uma aresta entre dois vértices que não estavam ligados','Duplicar arestas já existentes','Apagar arestas'],a:1,hint:'O carteiro não pode construir estradas novas.',why:'Só duplicas arestas existentes: representam passar de novo numa rua que já existe.'},
+]},
+{id:'w4',c:'--l4',name:'Linha Rosa',title:'Circuitos hamiltonianos',steps:[
+ {t:'learn',title:'Hamilton: visitar todas as casas',g:'ham',body:`<p>Um <b>circuito hamiltoniano</b> passa por <b>todos os vértices exatamente uma vez</b> e volta ao início. Não precisa de usar todas as arestas!</p>
+ <p>Um grafo com um circuito destes chama-se <b>grafo hamiltoniano</b>.</p>`,
+ tip:'<b>Euler = carteiro</b> (todas as RUAS). <b>Hamilton = turista</b> (todas as CIDADES, uma vez cada).'},
+ {t:'trace',mode:'ham',g:'ham',q:'Encontra um circuito hamiltoniano: toca em cada vértice uma vez e volta ao primeiro.',hint:'O F tem de ficar "entre" dois dos vértices A, C ou D. Tenta A → B → C → F → D → E → A.',why:'Visitaste todos os vértices uma única vez e voltaste ao início.'},
+ {t:'mc',q:'Este grafo (estrela) tem circuito hamiltoniano?',g:'star',opts:['Sim','Não: para sair de A, B ou C terias de voltar a passar no D'],a:1,hint:'A, B e C só estão ligados a D.',why:'Vértices de grau 1 nunca podem estar num circuito: entras e não tens por onde sair.'},
+ {t:'learn',title:'Quantos circuitos há em Kₙ?',body:`<p>Num grafo completo há sempre circuitos hamiltonianos. Fixando o vértice de partida:</p>
+ <div class="big">(n − 1)! circuitos<br><span class="small">ou (n − 1)! ÷ 2 se não contarmos o sentido</span></div>
+ <p>Exemplo K₄: 3! = 6 percursos, que são 3 circuitos diferentes (cada um feito nos dois sentidos).</p>`,
+ tip:'A-B-C-D-A e A-D-C-B-A são <b>o mesmo circuito</b>, ao contrário. Por isso se divide por 2. Lê bem o enunciado!'},
+ {t:'num',q:'Quantos circuitos hamiltonianos diferentes (sem contar o sentido) tem K₅?',a:12,hint:'(n − 1)! ÷ 2 com n = 5. Lembra-te: 4! = 4×3×2×1.',why:'4! = 24, e 24 ÷ 2 = 12.'},
+ {t:'learn',title:'O caixeiro-viajante e os algoritmos',g:'k5',body:`<p>Com pesos nas arestas, queremos o circuito hamiltoniano <b>mais barato</b>: é o <b>problema do caixeiro-viajante</b>.</p>
+ <ul><li><b>Força bruta</b>: testa todos os circuitos. Dá sempre o ótimo, mas demora muito.</li>
+ <li><b>Mínimos sucessivos</b> (vizinho mais próximo): em cada vértice vai para o mais perto ainda não visitado. No fim volta ao início. Rápido, mas <b>nem sempre ótimo</b>.</li>
+ <li><b>Ordenação dos pesos</b>: escolhe as arestas da mais leve para a mais pesada, rejeitando as que deixam um vértice com grau 3 ou fecham um circuito antes de ter todos os vértices.</li></ul>`,
+ tip:'Nos mínimos sucessivos, quando há empate escolhe-se ao acaso (ou como o enunciado disser).',
+ exam:'<b>No teste:</b> escreve o percurso completo (ex.: A-D-B-C-E-A) e a soma dos pesos (3+6+5+2+9 = 25).'},
+ {t:'nn',g:'k5',start:'A',q:'Aplica o algoritmo dos mínimos sucessivos (vizinho mais próximo) a partir de A. Toca nos vértices pela ordem certa.',hint:'Olha para os pesos que saem do vértice onde estás e escolhe o menor que leve a um vértice ainda não visitado.',why:'A → D → B → C → E → A, com peso total 3 + 6 + 5 + 2 + 9 = 25.'},
+ {t:'mc',q:'O algoritmo dos mínimos sucessivos…',opts:['Dá sempre a solução ótima','É rápido mas pode não dar a solução ótima','Só funciona em grafos eulerianos'],a:1,hint:'Só pensa no passo seguinte, não no percurso todo.',why:'É um algoritmo "guloso": escolhe o melhor de cada vez, e isso nem sempre dá o melhor total.'},
+ {t:'mc',q:'Algoritmo da ordenação dos pesos: qual destas escolhas é proibida?',opts:['Escolher a aresta mais leve disponível','Escolher uma aresta que deixe um vértice com grau 3','Escolher uma aresta que fecha o circuito no fim, com todos os vértices'],a:1,hint:'Num circuito, cada vértice tem exatamente 2 arestas.',why:'Num circuito hamiltoniano cada vértice tem grau 2. Grau 3 é proibido.'},
+]},
+{id:'wx',c:'--l6',name:'Linha Turquesa',title:'Exercícios tipo teste (passo a passo)',hearts:6,steps:[
+ {t:'learn',title:'Como funcionam estes exercícios',body:`<p>Aqui cada exercício tem um <b>enunciado</b> e várias alíneas, como no teste. Começa pelas perguntas fáceis e vai subindo.</p>
+ <p>Repara na etiqueta de cada pergunta: <span class="lv lv1">FÁCIL</span> <span class="lv lv2">MÉDIO</span> <span class="lv lv3">NÍVEL TESTE</span></p>`,tip:'Tens 6 vidas nesta linha. Antes de responder, escreve num papel o grau de cada vértice: resolve metade das perguntas.'},
+ // A — Grafo II da ficha
+ {t:'num',lv:1,ctx:'Exercício 1 (Ficha 1, Grafo II). Os vértices A, B e C têm um lacete cada e estão ligados ao vértice D.',g:'fichaII',q:'a) Qual é a ordem do grafo?',a:4,hint:'Ordem = número de vértices.',why:'Há 4 vértices: A, B, C e D.'},
+ {t:'num',lv:2,ctx:'Exercício 1 (Ficha 1, Grafo II).',g:'fichaII',q:'b) Quantas arestas tem o grafo?',a:6,hint:'Os lacetes também são arestas: 3 ligações a D + 3 lacetes.',why:'3 arestas até D + 3 lacetes = 6. Confirma: soma dos graus = 3+3+3+3 = 12 = 2 × 6.'},
+ {t:'num',lv:2,ctx:'Exercício 1 (Ficha 1, Grafo II).',g:'fichaII',q:'c) Qual é o grau do vértice A?',a:3,hint:'Uma aresta até D (conta 1) + o lacete (conta 2).',why:'1 + 2 = 3.'},
+ {t:'mc',lv:3,ctx:'Exercício 1 (Ficha 1, Grafo II).',g:'fichaII',q:'d) O grafo é regular?',opts:['Sim, todos os vértices têm grau 3','Não, porque tem lacetes','Não, porque D tem mais ligações'],a:0,hint:'Calcula o grau dos 4 vértices. Regular = todos iguais.',why:'A, B e C têm 1 + 2 = 3 e D tem 3. Todos iguais, logo é regular de grau 3. Ter lacetes não impede de ser regular.'},
+ {t:'mc',lv:2,ctx:'Exercício 1 (Ficha 1, Grafo II).',g:'fichaII',q:'e) O grafo é simples? É completo?',opts:['Simples e completo','Não é simples (tem lacetes) nem completo (A e B não estão ligados)','Simples, mas não completo'],a:1,hint:'Simples = sem lacetes nem arestas paralelas.',why:'Tem lacetes, logo não é simples. A e B não estão ligados, logo não é completo.'},
+ // B — grafo de 7 vértices
+ {t:'num',lv:1,ctx:'Exercício 2. Observa o grafo G, com 7 vértices.',g:'fich',q:'a) Indica a ordem de G.',a:7,hint:'Conta os vértices.',why:'Ordem = 7.'},
+ {t:'num',lv:2,ctx:'Exercício 2. Grafo G.',g:'fich',q:'b) Quantas arestas tem G?',a:9,hint:'Conta e confirma com a soma dos graus ÷ 2.',why:'Graus: A=2, B=4, C=3, D=3, E=4, F=1, G=1. Soma = 18, e 18 ÷ 2 = 9 arestas.'},
+ {t:'mc',lv:2,ctx:'Exercício 2. Grafo G.',g:'fich',q:'c) Quantos vértices de grau ímpar tem G?',opts:['2','4','0'],a:1,hint:'Escreve os graus de todos os vértices.',why:'C = 3, D = 3, F = 1 e G = 1: são 4.'},
+ {t:'mc',lv:3,ctx:'Exercício 2. Grafo G.',g:'fich',q:'d) G admite trajeto de Euler? Justifica.',opts:['Sim, de C para D','Não: G é conexo mas tem 4 vértices de grau ímpar','Sim, até admite circuito'],a:1,hint:'Regra: 0 ímpares → circuito, 2 → trajeto, mais → nada.',why:'Com 4 vértices de grau ímpar não existe trajeto nem circuito de Euler.'},
+ {t:'mc',lv:2,ctx:'Exercício 2. Grafo G.',g:'fich',q:'e) Quais são as pontes de G?',opts:['B–F e B–G','D–E','A–E e A–D'],a:0,hint:'Que arestas, se as tirares, deixam um vértice separado do resto?',why:'Sem B–F, o F fica isolado. Sem B–G, o G fica isolado.'},
+ {t:'mc',lv:3,ctx:'Exercício 2. Grafo G.',g:'fich',q:'f) G tem circuito hamiltoniano?',opts:['Sim','Não: F e G têm grau 1, entra-se e não se pode sair'],a:1,hint:'Num circuito, cada vértice precisa de 2 arestas: uma para entrar e outra para sair.',why:'Um vértice de grau 1 nunca pode estar num circuito.'},
+ {t:'eulerize',lv:3,ctx:'Exercício 2. Grafo G.',g:'fich',min:3,q:'g) Euleriza G duplicando o menor número possível de arestas.',hint:'F e G só se ligam a B: duplica B–F e B–G (assim B fica com grau 6, par). C e D são vizinhos: duplica C–D.',why:'3 duplicações: B–F, B–G e C–D. Agora todos os graus são pares.'},
+ // C — museu
+ {t:'mc',lv:2,ctx:'Exercício 3. Num museu há 5 salas (A a E). Cada aresta é uma porta entre duas salas; entre A e B há duas portas. O guarda quer passar por todas as portas uma só vez.',g:'museu',q:'a) Pode passar por todas as portas uma só vez e voltar à sala de partida?',opts:['Sim','Não, porque A e C têm grau ímpar','Não, porque o grafo não é conexo'],a:1,hint:'Calcula os graus. As duas portas A–B contam as duas.',why:'A = 3, B = 4, C = 3, D = 4, E = 2. Há 2 ímpares: existe trajeto, mas não circuito.'},
+ {t:'mc',lv:2,ctx:'Exercício 3. Museu.',g:'museu',q:'b) Em que salas tem de começar e acabar o percurso?',opts:['A e C','B e D','Em qualquer sala'],a:0,hint:'O trajeto de Euler começa e acaba nos vértices ímpares.',why:'Começa em A e acaba em C (ou ao contrário).'},
+ {t:'trace',lv:3,mode:'euler',closed:false,ctx:'Exercício 3. Museu.',g:'museu',q:'c) Desenha o percurso do guarda, sem repetir portas.',hint:'Começa em A. Por exemplo: A → B → A → D → B → C → D → E → C.',why:'Passaste em todas as portas uma vez. Começaste num ímpar e acabaste no outro.'},
+ {t:'num',lv:3,ctx:'Exercício 3. Museu.',g:'museu',q:'d) Se o guarda tiver de voltar à sala onde começou, quantas portas tem de repetir, no mínimo?',a:2,hint:'Euleriza: liga A a C pelo caminho mais curto. Não há porta direta A–C.',why:'A–B–C ou A–D–C: 2 portas repetidas.'},
+ // D — grelha
+ {t:'mc',lv:2,ctx:'Exercício 4. Um carteiro tem de percorrer todas as ruas de um bairro em grelha e voltar ao início. Cada rua mede 1 km.',g:'grid',q:'a) Que cruzamentos têm grau ímpar?',opts:['B, D, F e H (no meio dos lados)','Os cantos A, C, G e I','Só o centro E'],a:0,hint:'Cantos têm 2 ruas, o centro tem 4. E os do meio dos lados?',why:'B, D, F e H têm 3 ruas cada.'},
+ {t:'eulerize',lv:3,ctx:'Exercício 4. Bairro em grelha.',g:'grid',min:4,q:'b) Euleriza a grelha com o menor número de ruas repetidas.',hint:'Liga B a D passando pelo canto A (duplica A–B e A–D) e F a H passando pelo canto I (duplica F–I e H–I).',why:'São precisas 4 duplicações: cada par de ímpares fica a 2 ruas de distância.'},
+ {t:'num',lv:3,ctx:'Exercício 4. Bairro em grelha.',g:'grid',q:'c) Quantos km percorre o carteiro, no mínimo?',a:16,hint:'Conta as ruas da grelha e junta as repetidas.',why:'12 ruas + 4 repetidas = 16 km.'},
+ // E — caixeiro
+ {t:'num',lv:2,ctx:'Exercício 5. Um vendedor sai de Lisboa (L), visita Porto (P), Coimbra (C) e Faro (F) e volta a Lisboa. As distâncias (km) estão no grafo.',g:'tsp',q:'a) Quantos circuitos diferentes (sem contar o sentido) existem?',a:3,hint:'(n − 1)! ÷ 2 com n = 4.',why:'3! ÷ 2 = 6 ÷ 2 = 3.'},
+ {t:'nn',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',start:'L',q:'b) Aplica os mínimos sucessivos a partir de L.',hint:'De L, a mais curta é 205 (para C). Depois compara as que saem de C para cidades ainda não visitadas.',why:'L → C → P → F → L = 205 + 120 + 553 + 278 = 1156 km.'},
+ {t:'num',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'c) Pelo método de todas as hipóteses, quantos km tem o melhor circuito?',a:1149,hint:'Calcula os 3: L-P-C-F-L, L-P-F-C-L e L-C-P-F-L.',why:'L-P-C-F-L = 313+120+438+278 = 1149. L-P-F-C-L = 313+553+438+205 = 1509. L-C-P-F-L = 1156. O melhor é 1149 km.'},
+ {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'d) Os mínimos sucessivos deram a melhor solução?',opts:['Sim','Não: deram 1156 km e o ótimo é 1149 km'],a:1,hint:'Compara b) com c).',why:'É um método rápido, mas não garante o ótimo. Este é um exemplo clássico de teste.'},
+ {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'e) Ordenação dos pesos (120, 205, 278, 313, 438, 553): qual é a primeira aresta rejeitada?',opts:['P–C (120)','L–P (313), porque L ficaria com grau 3','P–F (553)'],a:1,hint:'Escolhe por ordem: P–C, L–C, L–F… e a seguir?',why:'Escolhes P–C, L–C e L–F. L–P deixaria L com 3 arestas: rejeita. C–F também (C ficaria com 3). P–F fecha o circuito P–C–L–F–P = 1156 km.'},
+ // F — misto
+ {t:'mc',lv:2,ctx:'Exercício 6. A "casinha" (já a desenhaste na Linha Verde).',g:'house',q:'A casinha tem circuito hamiltoniano?',opts:['Sim, por exemplo E–A–D–C–B–E','Não, porque tem vértices de grau ímpar'],a:0,hint:'Hamilton não depende dos graus serem pares. Experimenta!',why:'E–A–D–C–B–E passa uma vez por cada vértice. Os graus ímpares só contam para Euler.'},
+ {t:'mc',lv:3,ctx:'Exercício 6. Pensa sem desenho.',q:'Um grafo completo com 5 vértices (K₅) tem…',opts:['Circuito de Euler e circuito de Hamilton','Só circuito de Hamilton','Só circuito de Euler'],a:0,hint:'Em K₅, cada vértice tem grau 4. E os grafos completos são sempre hamiltonianos.',why:'Todos os graus são 4 (pares) → circuito de Euler. Sendo completo, tem circuito de Hamilton.'},
+ {t:'mc',lv:3,ctx:'Exercício 6. Pensa sem desenho.',q:'E K₄?',opts:['Circuito de Euler e de Hamilton','Só circuito de Hamilton','Nenhum'],a:1,hint:'Em K₄, cada vértice tem grau 3.',why:'4 vértices de grau 3 (ímpar) → sem Euler. É completo → tem Hamilton (A-B-C-D-A).'},
+]},
+{id:'w5',c:'--l5',name:'Linha Roxa',title:'Teste-relâmpago (estilo teste a pares)',steps:[
+ {t:'learn',title:'Modo teste',body:`<p>Perguntas misturadas de todas as linhas, como no teste de 16 de outubro. Tenta não usar o truque!</p>`,tip:'No teste tens 50 minutos e régua. Desenha os grafos com cuidado e marca os graus ao lado de cada vértice.'},
+ {t:'mc',q:'Um grafo conexo tem graus 2, 4, 4, 6, 2. Admite…',opts:['Circuito euleriano','Trajeto euleriano mas não circuito','Nenhum dos dois'],a:0,hint:'Quantos ímpares?',why:'Todos pares → circuito euleriano.'},
+ {t:'num',q:'Carteiro chinês: sai de A e volta a A. Qual é a distância mínima?',g:'post2',a:21,hint:'B e D são ímpares. Compara: B–D direto (6), B–A–D (2+3) e B–C–D (3+2). Soma todas as ruas e junta o caminho duplicado.',why:'Soma das ruas = 16. O caminho mais barato entre B e D é B–A–D (ou B–C–D) = 5, mais barato que o direto (6). Total = 16 + 5 = 21.'},
+ {t:'num',q:'Um grafo tem 6 vértices, todos de grau 3. Quantas arestas tem?',a:9,hint:'Soma dos graus ÷ 2.',why:'6 × 3 = 18, e 18 ÷ 2 = 9.'},
+ {t:'mc',q:'Uma câmara quer limpar todas as ruas de um bairro, sem repetir e voltando ao armazém. Que problema é?',opts:['Caixeiro-viajante (Hamilton)','Carteiro chinês (Euler)','Grafo completo'],a:1,hint:'Tem de passar em todas as RUAS ou em todas as CASAS?',why:'Todas as ruas → arestas → Euler / carteiro chinês.'},
+ {t:'mc',q:'Um vendedor tem de visitar 5 lojas uma vez cada e voltar à sede. Que problema é?',opts:['Carteiro chinês','Caixeiro-viajante (circuito hamiltoniano)','Trajeto euleriano'],a:1,hint:'Visita LOCAIS (vértices).',why:'Visitar todos os vértices uma vez e voltar → circuito hamiltoniano.'},
+ {t:'num',q:'Quantas arestas tem K₈?',a:28,hint:'8 × 7 ÷ 2',why:'56 ÷ 2 = 28.'},
+ {t:'mc',q:'Um grafo conexo tem exatamente 2 vértices de grau ímpar, P e Q. Para ter um circuito euleriano basta…',opts:['Duplicar as arestas do caminho mais curto entre P e Q','Apagar o vértice P','Acrescentar uma aresta nova de P a Q, mesmo que não exista'],a:0,hint:'Lembra-te da regra da eulerização.',why:'Duplicando o caminho mais curto entre P e Q, ambos ficam pares sem inventar arestas.'},
+ {t:'num',q:'Quantos circuitos hamiltonianos (contando os dois sentidos) tem K₆, fixado o vértice inicial?',a:120,hint:'(n − 1)! sem dividir por 2.',why:'5! = 120.'},
+ {t:'mc',q:'Qual é a diferença principal entre circuito euleriano e hamiltoniano?',opts:['Euler usa todas as arestas uma vez; Hamilton visita todos os vértices uma vez','São a mesma coisa','Euler visita vértices; Hamilton usa arestas'],a:0,hint:'Carteiro vs turista.',why:'Euler → arestas. Hamilton → vértices.'},
+]},
+{id:'wt',c:'--l7',name:'Linha Laranja',title:'Treino infinito (perguntas novas sempre)',hearts:3,gen:true,steps:[]}
+];
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+function fact(n){return n<=1?1:n*fact(n-1)}
+function degList(even){let l;do{const n=ri(4,6);l=Array.from({length:n},()=>ri(1,5))}while(even&&l.reduce((a,b)=>a+b,0)%2);return l}
+function makeTreino(){
+ const sum=l=>l.reduce((a,b)=>a+b,0);
+ const G=[
+  ()=>{const n=ri(4,12),a=n*(n-1)/2;return{t:'num',lv:1,q:`Quantas arestas tem o grafo completo K<sub>${n}</sub>?`,a,hint:'n × (n − 1) ÷ 2',why:`${n} × ${n-1} ÷ 2 = ${a}.`}},
+  ()=>{const n=ri(4,7),a=fact(n-1)/2;return{t:'num',lv:2,q:`Quantos circuitos hamiltonianos diferentes (sem contar o sentido) tem K<sub>${n}</sub>?`,a,hint:'(n − 1)! ÷ 2',why:`${n-1}! = ${fact(n-1)}, e ${fact(n-1)} ÷ 2 = ${a}.`}},
+  ()=>{const n=ri(4,6),a=fact(n-1);return{t:'num',lv:2,q:`Fixado o vértice de partida, quantos circuitos hamiltonianos (contando os dois sentidos) tem K<sub>${n}</sub>?`,a,hint:'(n − 1)!, sem dividir por 2.',why:`${n-1}! = ${a}.`}},
+  ()=>{const e=ri(5,20);return{t:'num',lv:1,q:`Um grafo tem ${e} arestas. Quanto dá a soma dos graus?`,a:2*e,hint:'Soma dos graus = 2 × arestas.',why:`2 × ${e} = ${2*e}.`}},
+  ()=>{const l=degList(true);return{t:'num',lv:2,q:`Os vértices de um grafo têm graus ${l.join(', ')}. Quantas arestas tem?`,a:sum(l)/2,hint:'Soma os graus e divide por 2.',why:`${l.join(' + ')} = ${sum(l)}, e ${sum(l)} ÷ 2 = ${sum(l)/2}.`}},
+  ()=>{const l=degList(true),k=l.filter(x=>x%2).length,a=k===0?0:k===2?1:2;return{t:'mc',lv:2,q:`Um grafo conexo tem graus ${l.join(', ')}. Admite…`,opts:['Circuito de Euler','Trajeto de Euler, mas não circuito','Nem trajeto nem circuito de Euler'],a,hint:'Conta os graus ímpares: 0, 2 ou mais?',why:`Há ${k} vértice${k===1?'':'s'} de grau ímpar → ${['circuito de Euler','trajeto de Euler','nem trajeto nem circuito'][a]}.`}},
+  ()=>{const l=degList(false),a=sum(l)%2?1:0;return{t:'mc',lv:2,q:`Pode existir um grafo (com lacetes ou arestas paralelas, se for preciso) com graus ${l.join(', ')}?`,opts:['Sim','Não'],a,hint:'A soma dos graus tem de ser par.',why:`A soma é ${sum(l)}, ${a?'ímpar, por isso não pode existir':'par, por isso pode existir'}.`}},
+  ()=>{const v=ri(4,12),e=ri(3,20);return{t:'num',lv:1,q:`Um grafo tem ${v} vértices e ${e} arestas. Qual é a ordem do grafo?`,a:v,hint:'A ordem conta os vértices.',why:`Ordem = ${v}.`}},
+  ()=>{const k=ri(1,4),m=ri(1,2);return{t:'num',lv:1,q:`Um vértice tem ${k} aresta${k>1?'s':''} normal${k>1?'is':''} e ${m} lacete${m>1?'s':''}. Qual é o grau?`,a:k+2*m,hint:'Cada lacete conta 2.',why:`${k} + 2 × ${m} = ${k+2*m}.`}},
+  ()=>{let n,g;do{n=ri(4,10);g=ri(2,5)}while(n*g%2||g>=n);return{t:'num',lv:2,q:`Um grafo regular tem ${n} vértices, todos de grau ${g}. Quantas arestas tem?`,a:n*g/2,hint:'Soma dos graus ÷ 2.',why:`${n} × ${g} = ${n*g}, e ${n*g} ÷ 2 = ${n*g/2}.`}},
+  ()=>{const C=[['Um carteiro tem de passar por todas as ruas de uma aldeia.',0],['Um turista quer visitar 6 monumentos, uma vez cada, e voltar ao hotel.',1],['Um camião do lixo percorre todas as estradas de um bairro.',0],['Uma enfermeira visita 5 doentes e volta ao centro de saúde.',1],['Um técnico tem de inspecionar todos os cabos de uma rede.',0],['Uma banda dá concertos em 7 cidades e volta a casa pelo caminho mais curto.',1],['Um limpa-neves tem de limpar todas as estradas da serra.',0]];const[c,a]=C[ri(0,C.length-1)];return{t:'mc',lv:1,q:`${c} É um problema de…`,opts:['Euler (passar por todas as arestas)','Hamilton (passar por todos os vértices)'],a,hint:'Ruas, estradas, cabos → arestas. Locais, cidades, pessoas → vértices.',why:a?'Visita locais (vértices) uma vez cada → Hamilton / caixeiro-viajante.':'Percorre ligações (arestas) → Euler / carteiro chinês.'}}
+ ];
+ const idx=G.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,10);
+ return idx.map(i=>G[i]());
+}
+W.find(w=>w.gen).steps=makeTreino();
+
+/* ---------- ESTADO ---------- */
+let S={view:'home'};
+const app=document.getElementById('app');
+const esc=s=>s;
+function daysLeft(){const t=new Date(2026,9,16),n=new Date();n.setHours(0,0,0,0);return Math.round((t-n)/864e5)}
+function starsHTML(n){let s='';for(let i=0;i<3;i++)s+=i<n?'★':'<span class="off">★</span>';return s}
+
+function render(){
+ if(S.view==='home')return home();
+ if(S.view==='sheet')return sheet();
+ if(S.view==='end')return endScr();
+ if(S.view==='over')return overScr();
+ return stepScr();
+}
+function home(){
+ const dl=daysLeft();
+ app.style.removeProperty('--wc');
+ app.innerHTML=`<div class="hero"><h1>Grafo<span>lândia</span></h1>
+ <p>Aprende a matéria e treina para o teste de MACS (11.º ano), estação a estação.</p>
+ <div class="chips"><span class="chip">${dl>0?`Faltam ${dl} dias para o teste`:dl===0?'O teste é hoje!':'Teste: 16 out'}</span><span class="chip">${save.xp} XP</span><span class="chip">Manual pág. 6–48</span></div></div>
+ <div class="metro">${W.map((w,i)=>`<button class="station" data-w="${i}" style="--c:var(${w.c})"><span class="dot">${i+1}</span>
+ <span><span class="st-name">${w.title}</span><span class="st-sub">${w.name} · ${w.gen?'10 perguntas novas de cada vez':w.steps.length+' paragens'}</span></span>
+ <span class="stars">${starsHTML(save.stars[w.id]||0)}</span></button>`).join('')}</div>
+ <div class="links"><button class="btn ghost" data-act="sheet">Ver a cábula</button><button class="btn ghost" data-act="reset">Recomeçar progresso</button></div>
+ <p class="foot">Matéria: noções básicas de grafos, trajetos e circuitos eulerianos (carteiro chinês, Fleury, eulerização) e circuitos hamiltonianos.</p>`;
+}
+function sheet(){
+ app.style.removeProperty('--wc');
+ app.innerHTML=`<div class="top"><button class="back" data-act="home" aria-label="Voltar">←</button><h2>Cábula</h2><span></span></div>
+ <div class="sheet">
+ <section style="--c:var(--l1)"><h3>Básico</h3><ul><li>Ordem = nº de vértices</li><li>Grau = nº de arestas que tocam no vértice (lacete conta 2)</li><li>Simples: sem lacetes nem arestas paralelas. Regular: todos com o mesmo grau</li><li>Soma dos graus = 2 × nº de arestas</li><li>Nº de vértices ímpares é sempre par</li><li>Kₙ: n(n−1)/2 arestas, cada vértice com grau n−1</li><li>Ponte: se a tirares, o grafo deixa de ser conexo</li><li>Trajeto: não repete arestas. Caminho: não repete vértices. Circuito: trajeto fechado</li></ul></section>
+ <section style="--c:var(--l2)"><h3>Euler (todas as arestas)</h3><ul><li>Conexo + 0 ímpares → circuito euleriano</li><li>Conexo + 2 ímpares → trajeto euleriano (de um ímpar ao outro)</li><li>Mais de 2 ímpares → nenhum</li><li>Justifica sempre: "conexo" + lista dos graus + teorema de Euler</li></ul></section>
+ <section style="--c:var(--l3)"><h3>Fleury, eulerização, carteiro chinês</h3><ul><li>Fleury: apaga as arestas usadas; só atravessas uma ponte se não houver alternativa</li><li>Eulerizar: duplicar arestas existentes, nunca criar novas</li><li>Liga os ímpares aos pares pelo caminho de menor peso</li><li>Custo do carteiro = soma de todos os pesos + pesos duplicados</li></ul></section>
+ <section style="--c:var(--l4)"><h3>Hamilton (todos os vértices)</h3><ul><li>Circuito que passa uma vez em cada vértice e volta ao início</li><li>Kₙ: (n−1)! circuitos, ou (n−1)!/2 sem contar o sentido</li><li>Força bruta: ótimo garantido, mas lento</li><li>Mínimos sucessivos (vizinho mais próximo): rápido, nem sempre ótimo</li><li>Ordenação dos pesos: da mais leve para a mais pesada; sem grau 3 nem circuitos antes do tempo</li></ul></section>
+ </div>`;
+}
+function startWorld(i){if(W[i].gen)W[i].steps=makeTreino();S={view:'step',w:i,i:0,hearts:W[i].hearts||3,sub:{}};render();window.scrollTo(0,0)}
+
+function stepScr(){
+ const w=W[S.w],st=w.steps[S.i],sub=S.sub;
+ app.style.setProperty('--wc',`var(${w.c})`);
+ const pct=Math.round(S.i/w.steps.length*100);
+ let h=`<div class="top"><button class="back" data-act="home" aria-label="Voltar ao mapa">←</button><div class="bar"><i style="width:${pct}%"></i></div><span class="hearts" aria-label="vidas">${'♥'.repeat(S.hearts)}<span style="opacity:.25">${'♥'.repeat((w.hearts||3)-S.hearts)}</span></span></div>
+ <div class="wtag">${w.name} · paragem ${S.i+1}/${w.steps.length}${(()=>{const lv=st.lv||(st.t==='learn'?0:['trace','eulerize','nn'].includes(st.t)?2:1);return lv?`<span class="lv lv${lv}">${['','Fácil','Médio','Nível teste'][lv]}</span>`:''})()}</div><div class="card" id="card">`;
+ if(st.ctx)h+=`<div class="enun"><b>Enunciado</b>${st.ctx}</div>`;
+ const gfx=g=>`<div class="gwrap">${g}</div>`;
+ const tipBtn=()=>st.hint&&!sub.done?(sub.showHint?`<div class="tip"><b>Truque</b>${st.hint}</div>`:`<button class="hintbtn" data-act="hint">Preciso de um truque</button>`):'';
+ const fb=()=>sub.done?`<div class="fb ok"><b>Certo!</b>${st.why}</div><button class="btn next" data-act="next">Continuar</button>`:(sub.msg?`<div class="fb bad"><b>Ainda não…</b>${sub.msg}</div>`:'');
+ if(st.t==='learn'){
+  h+=`<h2>${st.title}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}${st.body}${st.tip?`<div class="tip"><b>Truque</b>${st.tip}</div>`:''}${st.exam?`<div class="exam">${st.exam}</div>`:''}<button class="btn next" data-act="next">Percebi!</button>`;
+ } else if(st.t==='mc'){
+  sub.tried=sub.tried||[];
+  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}<div class="opts">${st.opts.map((o,k)=>{const c=sub.done&&k===st.a?'ok':sub.tried.includes(k)?'bad':'';return`<button class="opt ${c}" data-opt="${k}" ${sub.done||sub.tried.includes(k)?'disabled':''}>${o}</button>`}).join('')}</div>${tipBtn()}${fb()}`;
+ } else if(st.t==='num'){
+  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}<form class="row" data-form="num"><input class="num" id="num-${S.w}-${S.i}" type="number" inputmode="numeric" placeholder="A tua resposta" ${sub.done?'disabled':''} value="${sub.val??''}"><button class="btn" ${sub.done?'disabled':''}>Verificar</button></form>${tipBtn()}${fb()}`;
+ } else if(st.t==='trace'){
+  sub.path=sub.path||[];sub.used=sub.used||[];
+  const g=G[st.g];
+  h+=`<h2>${st.q}</h2><div class="gwrap">${svgGraph(g,{tap:!sub.done,used:sub.used,cur:sub.path[sub.path.length-1],visited:sub.path,showDeg:st.mode==='euler'})}</div>
+  <div class="pathline">${sub.path.length?sub.path.join(' → '):'<span class="small">Toca no vértice onde queres começar.</span>'}</div>
+  <div class="small">${st.mode==='euler'?`Arestas usadas: ${sub.used.length} de ${g.e.length}`:`Vértices visitados: ${new Set(sub.path).size} de ${Object.keys(g.v).length}`}</div>
+  ${sub.done?'':`<div class="row"><button class="btn ghost" data-act="undo">Desfazer</button><button class="btn ghost" data-act="clear">Recomeçar</button></div>`}${tipBtn()}${fb()}`;
+ } else if(st.t==='eulerize'){
+  sub.dups=sub.dups||[];
+  h+=`<h2>${st.q}</h2><div class="gwrap">${svgGraph(G[st.g],{edgeTap:!sub.done,dups:sub.dups,showDeg:true})}</div>
+  <div class="small">Arestas duplicadas: ${sub.dups.length}. Toca outra vez numa aresta para tirar a cópia.</div>
+  ${sub.done?'':`<button class="btn" data-act="checkEul">Verificar</button>`}${tipBtn()}${fb()}`;
+ } else if(st.t==='nn'){
+  sub.path=sub.path||[st.start];sub.used=sub.used||[];
+  const g=G[st.g];
+  h+=`<h2>${st.q}</h2><div class="gwrap">${svgGraph(g,{tap:!sub.done,used:sub.used,cur:sub.path[sub.path.length-1],visited:sub.path})}</div>
+  <div class="pathline">${sub.path.join(' → ')}</div>${sub.done?`<div class="big">Peso total: ${sub.total}</div>`:''}${tipBtn()}${fb()}`;
+ }
+ h+='</div>';
+ app.innerHTML=h;
+}
+function bad(msg,cost){const sub=S.sub;sub.msg=msg;if(cost){S.hearts--;if(S.hearts<=0){S.view='over';return render()}}render();const c=document.getElementById('card');c&&c.classList.add('shake')}
+function good(){S.sub.done=true;S.sub.msg='';save.xp+=10;persist();render()}
+function stars3(){const m=W[S.w].hearts||3;return Math.max(1,Math.round(S.hearts/m*3))}
+function next(){const w=W[S.w];S.i++;S.sub={};if(S.i>=w.steps.length){S.view='end';const prev=save.stars[w.id]||0;save.stars[w.id]=Math.max(prev,stars3());save.xp+=stars3()*10;persist()}render();window.scrollTo(0,0)}
+function endScr(){
+ const w=W[S.w];
+ app.innerHTML=`<div class="end"><h1>${w.name} completa!</h1><div class="bigstars">${starsHTML(stars3())}</div><p>${S.hearts===(w.hearts||3)?'Sem erros. Estás pronto para esta parte!':stars3()>=2?'Muito bem! Revê o que falhaste e tenta as 3 estrelas.':'Conseguiste! Repete esta linha para fixar a matéria.'}</p>
+ <div class="row" style="justify-content:center">${S.w<W.length-1?`<button class="btn" style="background:var(${W[S.w+1].c})" data-w="${S.w+1}">Próxima linha</button>`:''}<button class="btn ghost" data-w="${S.w}">Repetir</button><button class="btn ghost" data-act="home">Mapa</button></div></div>`;
+}
+function overScr(){
+ app.innerHTML=`<div class="end"><h1>Ficaste sem vidas</h1><p>Não faz mal: errar faz parte de aprender. Lê com calma os truques e tenta outra vez.</p><div class="row" style="justify-content:center"><button class="btn" data-w="${S.w}">Tentar de novo</button><button class="btn ghost" data-act="sheet">Ver a cábula</button></div></div>`;
+}
+
+/* ---------- INTERAÇÃO ---------- */
+function tapVertex(v){
+ const st=W[S.w].steps[S.i],sub=S.sub,g=G[st.g];if(sub.done)return;
+ const cur=sub.path[sub.path.length-1];
+ if(st.t==='trace'&&st.mode==='euler'){
+  if(!cur){if(st.start&&v!==st.start)return bad(`Neste exercício começa em ${st.start}.`);sub.path.push(v);sub.msg='';return render()}
+  const idx=g.e.findIndex(([a,b],i)=>!sub.used.includes(i)&&((a===cur&&b===v)||(b===cur&&a===v)));
+  if(idx<0){const any=g.e.some(([a,b])=>(a===cur&&b===v)||(b===cur&&a===v));return bad(any?`Já usaste a aresta ${cur}–${v}. Num trajeto não se repetem arestas.`:`Não há aresta entre ${cur} e ${v}.`)}
+  sub.used.push(idx);sub.path.push(v);sub.msg='';
+  if(sub.used.length===g.e.length){
+   if(st.closed&&sub.path[0]!==v)return bad('Usaste todas as arestas, mas não voltaste ao início. Num circuito acabas onde começaste. Recomeça.');
+   return good()}
+  const left=g.e.some(([a,b],i)=>!sub.used.includes(i)&&(a===v||b===v));
+  if(!left)return bad(`Ficaste preso em ${v}: já não há arestas livres a sair daqui. Desfaz ou recomeça.`);
+  return render();
+ }
+ if(st.t==='trace'&&st.mode==='ham'){
+  const n=Object.keys(g.v).length;
+  if(!cur){sub.path.push(v);sub.msg='';return render()}
+  const idx=g.e.findIndex(([a,b])=>(a===cur&&b===v)||(b===cur&&a===v));
+  if(idx<0)return bad(`${cur} e ${v} não estão ligados.`);
+  if(v===sub.path[0]&&sub.path.length===n){sub.used.push(idx);sub.path.push(v);return good()}
+  if(sub.path.includes(v))return bad(`Já passaste em ${v}. No circuito hamiltoniano cada vértice é visitado uma só vez${sub.path.length===n?'':' (exceto o regresso ao início, no fim)'}.`);
+  sub.used.push(idx);sub.path.push(v);sub.msg='';
+  if(sub.path.length===n&&!g.e.some(([a,b])=>(a===v&&b===sub.path[0])||(b===v&&a===sub.path[0])))return bad(`Visitaste todos, mas ${v} não está ligado a ${sub.path[0]}, por isso não consegues voltar. Desfaz e tenta outra ordem.`);
+  if(sub.path.length===n)sub.msg='';
+  return render();
+ }
+ if(st.t==='nn'){
+  const verts=Object.keys(g.v),n=verts.length;
+  const w=(a,b)=>{const e=g.e.find(([x,y])=>(x===a&&y===b)||(x===b&&y===a));return e?e[2]:Infinity};
+  let exp;
+  if(sub.path.length===n)exp=sub.path[0];else exp=verts.filter(x=>!sub.path.includes(x)).sort((a,b)=>w(cur,a)-w(cur,b))[0];
+  if(v!==exp){if(v===cur)return;return bad(sub.path.length===n?'Já visitaste todos. Agora volta ao vértice inicial.':`De ${cur} para ${v} pesa ${w(cur,v)===Infinity?'—':w(cur,v)}${sub.path.includes(v)?' e esse vértice já foi visitado':''}. Há uma opção mais leve.`,true)}
+  const idx=g.e.findIndex(([x,y])=>(x===cur&&y===v)||(y===cur&&x===v));
+  sub.used.push(idx);sub.path.push(v);sub.msg='';
+  if(sub.path.length===n+1){sub.total=sub.used.reduce((s,i)=>s+g.e[i][2],0);return good()}
+  return render();
+ }
+}
+app.addEventListener('click',e=>{
+ const t=e.target;
+ const vg=t.closest('[data-v]');if(vg&&S.view==='step'){return tapVertex(vg.dataset.v)}
+ const ed=t.closest('[data-e]');if(ed&&S.view==='step'){const i=+ed.dataset.e,d=S.sub.dups;const k=d.indexOf(i);k<0?d.push(i):d.splice(k,1);S.sub.msg='';return render()}
+ const ws=t.closest('[data-w]');if(ws)return startWorld(+ws.dataset.w);
+ const op=t.closest('[data-opt]');if(op){const st=W[S.w].steps[S.i],k=+op.dataset.opt;if(k===st.a)return good();S.sub.tried.push(k);return bad(st.hint,true)}
+ const a=t.closest('[data-act]');if(!a)return;
+ const act=a.dataset.act,sub=S.sub;
+ if(act==='home'){S={view:'home'};render();window.scrollTo(0,0)}
+ else if(act==='sheet'){S={view:'sheet'};render();window.scrollTo(0,0)}
+ else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0};persist();render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
+ else if(act==='next')next();
+ else if(act==='hint'){sub.showHint=true;render()}
+ else if(act==='undo'){if(sub.path.length){sub.path.pop();while(sub.used.length>Math.max(0,sub.path.length-1))sub.used.pop()}sub.msg='';render()}
+ else if(act==='clear'){sub.path=[];sub.used=[];sub.msg='';render()}
+ else if(act==='checkEul'){const st=W[S.w].steps[S.i],d=deg(G[st.g],sub.dups);const odd=Object.keys(d).filter(k=>d[k]%2);
+  if(odd.length)return bad(`Ainda há vértices de grau ímpar: ${odd.join(', ')}.`);
+  if(sub.dups.length>st.min)return bad(`Funciona, mas usaste ${sub.dups.length} duplicações. Dá para fazer com ${st.min}.`);
+  good()}
+});
+app.addEventListener('submit',e=>{e.preventDefault();const st=W[S.w].steps[S.i];const inp=e.target.querySelector('input');const v=parseFloat(String(inp.value).replace(',','.'));S.sub.val=inp.value;if(isNaN(v))return bad('Escreve um número.');if(v===st.a)return good();bad(st.hint,true)});
+render();
+</script>
+
+<!-- PWA: regista o service worker (permite jogar sem internet) -->
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
