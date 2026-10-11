@@ -22,3 +22,4 @@ Funciona como app (PWA): pode ser adicionado ao ecrã principal e funciona sem i
 - `manifest.webmanifest` — nome, cores e ícones da app
 - `sw.js` — service worker (guarda o jogo para funcionar offline)
 - `icons/` — ícones da app
+- `tools/verificar.mjs` — confirma as contas dos grafos e das respostas: `node tools/verificar.mjs`

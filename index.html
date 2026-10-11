@@ -133,6 +133,23 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 /* A barra fixa do topo tapa também a zona do notch, para o texto não aparecer por trás dele */
 .top{box-shadow:0 calc(-1 * env(safe-area-inset-top,0px)) 0 var(--bg)}
 </style>
+<style>
+/* Linha Cinzenta (justificações) e dois desenhos lado a lado */
+:root{--l8:#5f6b75}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--l8:#6f7c86}}
+:root[data-theme="dark"]{--l8:#6f7c86}
+.metro::before{background:linear-gradient(var(--l1),var(--l2),var(--l3),var(--l4),var(--l6),var(--l5),var(--l8),var(--l7))}
+.gpair{display:grid;gap:8px;margin-top:8px}
+.ans{width:100%;min-height:140px;resize:vertical;font:inherit;font-size:max(16px,1rem);line-height:1.45;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.ans:focus-visible{outline:3px solid var(--wc);outline-offset:2px}
+.model{border:2px solid var(--wc);border-radius:12px;padding:10px 12px;font-size:.95rem;display:grid;gap:6px}
+.model>b:first-child{font-family:var(--display);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--wc)}
+.model p,.model ul{margin:0}
+.crits{display:grid;gap:8px}
+.crit{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;min-height:44px;padding:8px 12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;cursor:pointer;font-size:.95rem}
+.crit input{width:22px;height:22px;margin:0;accent-color:var(--wc)}
+.crit b{white-space:nowrap;color:var(--wc);font-variant-numeric:tabular-nums}
+</style>
 
 </head>
 <body>
@@ -162,6 +179,10 @@ const G={
  grid:{v:{A:[50,30],B:[150,30],C:[250,30],D:[50,115],E:[150,115],F:[250,115],G:[50,200],H:[150,200],I:[250,200]},e:[['A','B'],['B','C'],['D','E'],['E','F'],['G','H'],['H','I'],['A','D'],['D','G'],['B','E'],['E','H'],['C','F'],['F','I']]},
  tsp:{v:{P:[70,35],C:[240,50],F:[250,195],L:[55,185]},e:[['P','C',120],['L','C',205,.3],['L','F',278],['L','P',313],['C','F',438],['P','F',553,.3]]},
  star:{v:{A:[150,30],B:[40,190],C:[260,190],D:[150,135]},e:[['A','D'],['B','D'],['C','D']]},
+ hp:{v:{A:[150,25],B:[60,85],C:[250,150],D:[150,215],E:[245,85],F:[30,170],G:[270,205]},e:[['A','B'],['B','C'],['C','D'],['D','E'],['E','A'],['F','A'],['F','B'],['G','C'],['G','D'],['F','G']],h:235},
+ arv:{v:{A:[150,25],B:[45,100],C:[150,125],D:[90,210],E:[230,190]},e:[['A','B'],['A','C'],['A','E'],['B','C'],['B','D'],['C','D'],['C','E'],['D','E']],h:235},
+ iso1:{v:{L:[60,30],M:[240,30],N:[60,115],P:[240,115]},e:[['L','N'],['M','N'],['M','P'],['N','P']],h:145},
+ iso2:{v:{L:[35,110],N:[135,70],M:[260,30],P:[260,115]},e:[['L','N'],['M','N'],['M','P'],['N','P']],h:145},
 };
 function deg(g,dups){const d={};Object.keys(g.v).forEach(k=>d[k]=0);g.e.forEach(([a,b])=>{d[a]++;d[b]++});(dups||[]).forEach(i=>{const[a,b]=g.e[i];d[a]++;d[b]++});return d}
 
@@ -235,6 +256,13 @@ const W=[
  <li><b>Circuito</b>: trajeto que <b>começa e acaba no mesmo vértice</b>.</li></ul>`,
  tip:'Pensa num passeio de bicicleta: trajeto = nunca passas duas vezes na mesma rua. Circuito = e ainda chegas a casa.'},
  {t:'mc',q:'Um trajeto que começa e termina no mesmo vértice chama-se…',opts:['Caminho fechado com arestas repetidas','Circuito','Ponte','Lacete'],a:1,hint:'É a palavra para um passeio que volta a casa.',why:'Circuito = trajeto fechado.'},
+ {t:'learn',title:'Da tabela (ou da história) para o grafo',body:`<p>Muitas perguntas do teste dão uma <b>tabela</b> ou uma <b>história</b> em vez do desenho. Tu fazes o grafo:</p>
+ <ul><li>Cada cidade, pessoa ou sala é um <b>vértice</b>.</li><li>Cada ligação (estrada, jogo, porta) é uma <b>aresta</b>.</li><li>Confirma no fim: <b>soma dos graus = 2 × nº de arestas</b>.</li></ul>
+ <p>Dois desenhos diferentes podem ser <b>o mesmo grafo</b>, se tiverem os mesmos pares ligados.</p>`,
+ tip:'Num grafo só interessa <b>quem está ligado a quem</b>. A posição dos pontos e o tamanho das linhas não contam.'},
+ {t:'num',lv:2,q:'Tabela de ligações: A liga a B, C e D. B liga a A e C. C liga a A, B e D. D liga a A e C. Quantas arestas tem o grafo?',a:5,hint:'Os graus são o número de ligações de cada um. Soma-os e divide por 2.',why:'Graus: 3 + 2 + 3 + 2 = 10, e 10 ÷ 2 = 5 arestas. Cada ligação aparece duas vezes na tabela (A–B e B–A).'},
+ {t:'mc',lv:2,q:'Num torneio de xadrez há 8 jogadores. Cada um joga com outros 3. O grafo do torneio é…',opts:['Regular de grau 3, com 12 arestas','Completo, com 28 arestas','Regular de grau 8, com 24 arestas'],a:0,hint:'Jogadores = vértices, jogos = arestas. Soma dos graus ÷ 2.',why:'Todos têm grau 3, logo é regular. Arestas: 8 × 3 ÷ 2 = 12 jogos. Não é completo: cada um só joga com 3 dos outros 7.'},
+ {t:'mc',lv:1,ctx:`Dois desenhos com os vértices L, M, N e P. Nos dois, as ligações são L–N, M–N, M–P e N–P.<div class="gpair"><div class="gwrap">${svgGraph(G.iso1)}</div><div class="gwrap">${svgGraph(G.iso2)}</div></div>`,q:'Estes dois desenhos são…',opts:['O mesmo grafo','Grafos diferentes','Depende do tamanho das linhas'],a:0,hint:'Compara só os pares ligados. A forma do desenho não conta.',why:'Têm exatamente os mesmos pares ligados, por isso são o mesmo grafo, só desenhado de outra maneira.'},
 ]},
 {id:'w2',c:'--l2',name:'Linha Verde',title:'Trajetos e circuitos eulerianos',steps:[
  {t:'learn',title:'As pontes de Königsberg',g:'kon',body:`<p>Em 1736, os habitantes de Königsberg perguntavam: dá para passear pela cidade passando <b>uma só vez</b> em cada uma das 7 pontes?</p>
@@ -244,7 +272,7 @@ const W=[
  <ul><li><b>0 ímpares</b> → há <b>circuito euleriano</b> (volta ao início)</li>
  <li><b>2 ímpares</b> → há <b>trajeto euleriano</b>: começa num ímpar e acaba no outro</li>
  <li><b>4 ou mais</b> → não há nenhum dos dois</li></ul>`,
- tip:'Conta só os ímpares: <b>0 → circuito, 2 → trajeto, mais → nada</b>.',
+ tip:'Conta só os ímpares: <b>0 → circuito, 2 → trajeto, mais → nada</b>. Um grafo com circuito de Euler chama-se <b>grafo euleriano</b>; se só tiver trajeto, chama-se <b>semieuleriano</b>.',
  exam:'<b>Como justificar no teste:</b> "O grafo é conexo e todos os vértices têm grau par, logo, pelo teorema de Euler, admite um circuito euleriano." Escreve sempre os graus de todos os vértices.'},
  {t:'mc',q:'Königsberg: os graus são I=5, N=3, S=3, L=3. O passeio é possível?',g:'kon',opts:['Sim, é um circuito euleriano','Sim, é um trajeto euleriano','Não, há 4 vértices de grau ímpar'],a:2,hint:'Quantos vértices têm grau ímpar?',why:'Os 4 vértices têm grau ímpar. Com mais de 2 ímpares não existe trajeto nem circuito euleriano.'},
  {t:'mc',q:'Este grafo tem…',g:'sqd',showDeg:true,opts:['Circuito euleriano','Trajeto euleriano (mas não circuito)','Nenhum'],a:1,hint:'Conta as bolinhas vermelhas.',why:'Só A e C têm grau ímpar (3). Há trajeto euleriano a começar em A e acabar em C, ou ao contrário.'},
@@ -252,6 +280,7 @@ const W=[
  {t:'trace',mode:'euler',closed:true,g:'bowtie',q:'Desenha um circuito euleriano: toca nos vértices pela ordem do percurso. Usa todas as arestas uma vez e volta ao início.',hint:'Todos os graus são pares, podes começar onde quiseres. Passa pelo C duas vezes: ele tem grau 4.',why:'Boa! Um circuito possível é A → B → C → D → E → C → A.'},
  {t:'trace',mode:'euler',closed:false,g:'house',q:'A "casinha": desenha-a sem levantar o lápis e sem repetir linhas. Onde tens de começar?',hint:'C e D têm grau 3 (ímpar). Começa num deles e acabarás no outro.',why:'Exato. Só dá se começares num vértice ímpar (C ou D). Acabas sempre no outro ímpar.'},
  {t:'mc',q:'Um grafo conexo tem trajeto euleriano que começa em P. Onde acaba?',opts:['Em P','No outro vértice de grau ímpar','Num vértice de grau par qualquer'],a:1,hint:'Num trajeto euleriano, quantos vértices ímpares há?',why:'Há exatamente 2 vértices ímpares: o trajeto começa num e acaba no outro.'},
+ {t:'mc',lv:2,ctx:'Um grupo faz uma caminhada num jardim. Querem percorrer todos os trilhos uma só vez e voltar ao ponto de partida. O grafo dos trilhos é conexo e tem 4 vértices de grau ímpar.',q:'a) É possível? b) O que se pode fazer?',opts:['Não é possível; eulerizar o grafo, repetindo o menor número de trilhos','É possível, basta começar num vértice ímpar','Não é possível e não há nada a fazer'],a:0,hint:'Com 4 ímpares não há circuito nem trajeto de Euler. Lembra-te da Linha Amarela.',why:'Com 4 vértices ímpares não há circuito de Euler. A solução é eulerizar: repetir (duplicar) o menor número de trilhos para todos os graus ficarem pares.'},
 ]},
 {id:'w3',c:'--l3',name:'Linha Amarela',title:'Fleury, eulerização e carteiro chinês',steps:[
  {t:'learn',title:'Algoritmo de Fleury',g:'bridge',body:`<p>É uma receita para encontrar o circuito ou trajeto euleriano sem te perderes:</p>
@@ -279,20 +308,33 @@ const W=[
  <p>Um grafo com um circuito destes chama-se <b>grafo hamiltoniano</b>.</p>`,
  tip:'<b>Euler = carteiro</b> (todas as RUAS). <b>Hamilton = turista</b> (todas as CIDADES, uma vez cada).'},
  {t:'trace',mode:'ham',g:'ham',q:'Encontra um circuito hamiltoniano: toca em cada vértice uma vez e volta ao primeiro.',hint:'O F tem de ficar "entre" dois dos vértices A, C ou D. Tenta A → B → C → F → D → E → A.',why:'Visitaste todos os vértices uma única vez e voltaste ao início.'},
+ {t:'learn',title:'Percurso (caminho) de Hamilton',body:`<ul><li><b>Circuito (ou ciclo) de Hamilton</b>: passa por todos os vértices uma vez <b>e volta ao início</b>.</li>
+ <li><b>Percurso (ou caminho) de Hamilton</b>: passa por todos os vértices uma vez, <b>sem voltar</b> ao início.</li></ul>
+ <p>No percurso, o vértice onde começas e o vértice onde acabas são diferentes.</p>`,
+ tip:'Começa pelos vértices com <b>poucas ligações</b>: são os que mais limitam. Num circuito, um vértice de <b>grau 2</b> tem de usar as suas duas arestas.'},
+ {t:'trace',lv:3,mode:'ham',g:'hp',start:'F',end:'G',q:'Encontra um percurso de Hamilton que comece em F e termine em G.',hint:'Só há uma solução! Tenta F → B → A → …',why:'F → B → A → E → D → C → G. Passaste em todos os vértices uma só vez e acabaste em G.'},
+ {t:'learn',title:'Contar com um esquema em árvore',g:'arv',body:`<p>Para contar caminhos ou circuitos sem te perderes, faz uma <b>árvore</b>:</p>
+ <ul><li>Começa no vértice inicial.</li><li>Em cada ramo, escreve os vizinhos <b>ainda não visitados</b>.</li><li>Um ramo "morre" quando não há para onde ir.</li><li>Conta os ramos que chegam ao fim com <b>todos os vértices</b>.</li></ul>
+ <p>Num grafo pesado, escreve a soma dos pesos no fim de cada ramo e escolhe a <b>menor</b>.</p>`,
+ tip:'Para circuitos, no fim confirma se o último vértice está ligado ao inicial. Cada circuito aparece 2 vezes na árvore (um em cada sentido).'},
+ {t:'num',lv:3,g:'arv',q:'Quantos caminhos diferentes há de A até D, passando por todos os vértices uma só vez?',a:2,hint:'Faz a árvore a partir de A e guarda só os ramos que acabam em D com os 5 vértices.',why:'São 2: A–B–C–E–D e A–E–C–B–D.'},
+ {t:'num',lv:3,g:'arv',q:'Quantos circuitos de Hamilton diferentes (sem contar o sentido) começam e acabam em A?',a:4,hint:'Faz a árvore a partir de A. Conta os ramos com os 5 vértices que voltam a A e divide por 2.',why:'A árvore dá 8 percursos que voltam a A. Cada circuito aparece nos dois sentidos: 8 ÷ 2 = 4. São A-B-C-D-E-A, A-B-D-C-E-A, A-B-D-E-C-A e A-C-B-D-E-A.'},
  {t:'mc',q:'Este grafo (estrela) tem circuito hamiltoniano?',g:'star',opts:['Sim','Não: para sair de A, B ou C terias de voltar a passar no D'],a:1,hint:'A, B e C só estão ligados a D.',why:'Vértices de grau 1 nunca podem estar num circuito: entras e não tens por onde sair.'},
  {t:'learn',title:'Quantos circuitos há em Kₙ?',body:`<p>Num grafo completo há sempre circuitos hamiltonianos. Fixando o vértice de partida:</p>
  <div class="big">(n − 1)! circuitos<br><span class="small">ou (n − 1)! ÷ 2 se não contarmos o sentido</span></div>
  <p>Exemplo K₄: 3! = 6 percursos, que são 3 circuitos diferentes (cada um feito nos dois sentidos).</p>`,
  tip:'A-B-C-D-A e A-D-C-B-A são <b>o mesmo circuito</b>, ao contrário. Por isso se divide por 2. Lê bem o enunciado!'},
  {t:'num',q:'Quantos circuitos hamiltonianos diferentes (sem contar o sentido) tem K₅?',a:12,hint:'(n − 1)! ÷ 2 com n = 5. Lembra-te: 4! = 4×3×2×1.',why:'4! = 24, e 24 ÷ 2 = 12.'},
- {t:'learn',title:'O caixeiro-viajante e os algoritmos',g:'k5',body:`<p>Com pesos nas arestas, queremos o circuito hamiltoniano <b>mais barato</b>: é o <b>problema do caixeiro-viajante</b>.</p>
+ {t:'learn',title:'O caixeiro-viajante e os algoritmos',g:'k5',body:`<p>Um grafo com números nas arestas chama-se <b>grafo pesado</b> (ou ponderado).</p>
+ <p>Com pesos nas arestas, queremos o circuito hamiltoniano <b>mais barato</b>: é o <b>problema do caixeiro-viajante</b>.</p>
  <ul><li><b>Força bruta</b>: testa todos os circuitos. Dá sempre o ótimo, mas demora muito.</li>
  <li><b>Mínimos sucessivos</b> (vizinho mais próximo): em cada vértice vai para o mais perto ainda não visitado. No fim volta ao início. Rápido, mas <b>nem sempre ótimo</b>.</li>
- <li><b>Ordenação dos pesos</b>: escolhe as arestas da mais leve para a mais pesada, rejeitando as que deixam um vértice com grau 3 ou fecham um circuito antes de ter todos os vértices.</li></ul>`,
- tip:'Nos mínimos sucessivos, quando há empate escolhe-se ao acaso (ou como o enunciado disser).',
+ <li><b>Ordenação dos pesos</b> (ou ordenação do peso das arestas): escolhe as arestas da mais leve para a mais pesada, rejeitando as que deixam um vértice com grau 3 ou fecham um circuito antes de ter todos os vértices.</li></ul>`,
+ tip:'Nos mínimos sucessivos (vizinho mais próximo), quando há empate escolhe-se ao acaso (ou como o enunciado disser).',
  exam:'<b>No teste:</b> escreve o percurso completo (ex.: A-D-B-C-E-A) e a soma dos pesos (3+6+5+2+9 = 25).'},
  {t:'nn',g:'k5',start:'A',q:'Aplica o algoritmo dos mínimos sucessivos (vizinho mais próximo) a partir de A. Toca nos vértices pela ordem certa.',hint:'Olha para os pesos que saem do vértice onde estás e escolhe o menor que leve a um vértice ainda não visitado.',why:'A → D → B → C → E → A, com peso total 3 + 6 + 5 + 2 + 9 = 25.'},
- {t:'mc',q:'O algoritmo dos mínimos sucessivos…',opts:['Dá sempre a solução ótima','É rápido mas pode não dar a solução ótima','Só funciona em grafos eulerianos'],a:1,hint:'Só pensa no passo seguinte, não no percurso todo.',why:'É um algoritmo "guloso": escolhe o melhor de cada vez, e isso nem sempre dá o melhor total.'},
+ {t:'mc',lv:2,q:'Um camião tem de visitar 10 lojas e voltar ao armazém (grafo K₁₀). Porque é que o método de todas as hipóteses não é viável?',opts:['Porque há 9! ÷ 2 = 181 440 circuitos para calcular','Porque não dá a solução ótima','Porque só funciona com 4 vértices'],a:0,hint:'Usa (n − 1)! ÷ 2 com n = 10.',why:'9! ÷ 2 = 181 440 circuitos. Dá o ótimo, mas demora demasiado: não tem <b>viabilidade económica</b> (custa muito tempo e dinheiro). Por isso usam-se métodos rápidos, como os mínimos sucessivos (vizinho mais próximo) ou a ordenação dos pesos, mesmo que nem sempre deem o ótimo.'},
+ {t:'mc',q:'O algoritmo dos mínimos sucessivos (vizinho mais próximo)…',opts:['Dá sempre a solução ótima','É rápido mas pode não dar a solução ótima','Só funciona em grafos eulerianos'],a:1,hint:'Só pensa no passo seguinte, não no percurso todo.',why:'É um algoritmo "guloso": escolhe o melhor de cada vez, e isso nem sempre dá o melhor total.'},
  {t:'mc',q:'Algoritmo da ordenação dos pesos: qual destas escolhas é proibida?',opts:['Escolher a aresta mais leve disponível','Escolher uma aresta que deixe um vértice com grau 3','Escolher uma aresta que fecha o circuito no fim, com todos os vértices'],a:1,hint:'Num circuito, cada vértice tem exatamente 2 arestas.',why:'Num circuito hamiltoniano cada vértice tem grau 2. Grau 3 é proibido.'},
 ]},
 {id:'wx',c:'--l6',name:'Linha Turquesa',title:'Exercícios tipo teste (passo a passo)',hearts:6,steps:[
@@ -323,9 +365,11 @@ const W=[
  {t:'num',lv:3,ctx:'Exercício 4. Bairro em grelha.',g:'grid',q:'c) Quantos km percorre o carteiro, no mínimo?',a:16,hint:'Conta as ruas da grelha e junta as repetidas.',why:'12 ruas + 4 repetidas = 16 km.'},
  // E — caixeiro
  {t:'num',lv:2,ctx:'Exercício 5. Um vendedor sai de Lisboa (L), visita Porto (P), Coimbra (C) e Faro (F) e volta a Lisboa. As distâncias (km) estão no grafo.',g:'tsp',q:'a) Quantos circuitos diferentes (sem contar o sentido) existem?',a:3,hint:'(n − 1)! ÷ 2 com n = 4.',why:'3! ÷ 2 = 6 ÷ 2 = 3.'},
- {t:'nn',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',start:'L',q:'b) Aplica os mínimos sucessivos a partir de L.',hint:'De L, a mais curta é 205 (para C). Depois compara as que saem de C para cidades ainda não visitadas.',why:'L → C → P → F → L = 205 + 120 + 553 + 278 = 1156 km.'},
+ {t:'nn',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',start:'L',q:'b) Aplica os mínimos sucessivos (vizinho mais próximo) a partir de L.',hint:'De L, a mais curta é 205 (para C). Depois compara as que saem de C para cidades ainda não visitadas.',why:'L → C → P → F → L = 205 + 120 + 553 + 278 = 1156 km.'},
  {t:'num',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'c) Pelo método de todas as hipóteses, quantos km tem o melhor circuito?',a:1149,hint:'Calcula os 3: L-P-C-F-L, L-P-F-C-L e L-C-P-F-L.',why:'L-P-C-F-L = 313+120+438+278 = 1149. L-P-F-C-L = 313+553+438+205 = 1509. L-C-P-F-L = 1156. O melhor é 1149 km.'},
- {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'d) Os mínimos sucessivos deram a melhor solução?',opts:['Sim','Não: deram 1156 km e o ótimo é 1149 km'],a:1,hint:'Compara b) com c).',why:'É um método rápido, mas não garante o ótimo. Este é um exemplo clássico de teste.'},
+ {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'d) Os mínimos sucessivos (vizinho mais próximo) deram a melhor solução?',opts:['Sim','Não: deram 1156 km e o ótimo é 1149 km'],a:1,hint:'Compara b) com c).',why:'É um método rápido, mas não garante o ótimo. Este é um exemplo clássico de teste.'},
+ {t:'nn',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',start:'C',q:'d2) Aplica agora os mínimos sucessivos (vizinho mais próximo) a partir de Coimbra (C).',hint:'De C, a mais curta é 120 (para P). Depois, de P, compara as que vão para cidades ainda não visitadas.',why:'C → P → L → F → C = 120 + 313 + 278 + 438 = 1149 km. A começar em C, os mínimos sucessivos já dão o ótimo!'},
+ {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',q:'O que se conclui?',opts:['O resultado dos mínimos sucessivos (vizinho mais próximo) pode mudar consoante o vértice de partida','Dá sempre o mesmo resultado','Começar em C está errado'],a:0,hint:'Compara b) (a partir de L) com d2) (a partir de C).',why:'A partir de L deu 1156 km; a partir de C deu 1149 km. O resultado depende do vértice de partida.'},
  {t:'mc',lv:3,ctx:'Exercício 5. Caixeiro-viajante.',g:'tsp',q:'e) Ordenação dos pesos (120, 205, 278, 313, 438, 553): qual é a primeira aresta rejeitada?',opts:['P–C (120)','L–P (313), porque L ficaria com grau 3','P–F (553)'],a:1,hint:'Escolhe por ordem: P–C, L–C, L–F… e a seguir?',why:'Escolhes P–C, L–C e L–F. L–P deixaria L com 3 arestas: rejeita. C–F também (C ficaria com 3). P–F fecha o circuito P–C–L–F–P = 1156 km.'},
  // F — misto
  {t:'mc',lv:2,ctx:'Exercício 6. A "casinha" (já a desenhaste na Linha Verde).',g:'house',q:'A casinha tem circuito hamiltoniano?',opts:['Sim, por exemplo E–A–D–C–B–E','Não, porque tem vértices de grau ímpar'],a:0,hint:'Hamilton não depende dos graus serem pares. Experimenta!',why:'E–A–D–C–B–E passa uma vez por cada vértice. Os graus ímpares só contam para Euler.'},
@@ -343,6 +387,36 @@ const W=[
  {t:'mc',q:'Um grafo conexo tem exatamente 2 vértices de grau ímpar, P e Q. Para ter um circuito euleriano basta…',opts:['Duplicar as arestas do caminho mais curto entre P e Q','Apagar o vértice P','Acrescentar uma aresta nova de P a Q, mesmo que não exista'],a:0,hint:'Lembra-te da regra da eulerização.',why:'Duplicando o caminho mais curto entre P e Q, ambos ficam pares sem inventar arestas.'},
  {t:'num',q:'Quantos circuitos hamiltonianos (contando os dois sentidos) tem K₆, fixado o vértice inicial?',a:120,hint:'(n − 1)! sem dividir por 2.',why:'5! = 120.'},
  {t:'mc',q:'Qual é a diferença principal entre circuito euleriano e hamiltoniano?',opts:['Euler usa todas as arestas uma vez; Hamilton visita todos os vértices uma vez','São a mesma coisa','Euler visita vértices; Hamilton usa arestas'],a:0,hint:'Carteiro vs turista.',why:'Euler → arestas. Hamilton → vértices.'},
+]},
+{id:'wj',c:'--l8',name:'Linha Cinzenta',title:'Justifica como no teste',steps:[
+ {t:'learn',title:'Como se justifica no teste',body:`<p>No teste, grande parte dos pontos vem do que <b>escreves</b>, não só do resultado.</p>
+ <ul><li>1. Escreve a tua resposta na caixa, como farias no teste.</li><li>2. Toca em <b>Ver resposta-modelo</b>.</li><li>3. Marca os critérios que cumpriste e vê quantos pontos terias.</li></ul>
+ <p>Esta linha <b>não tira vidas</b>. O que escreves fica guardado neste telemóvel.</p>`,
+ tip:'Usa sempre o esquema: <b>dados</b> (graus, pesos) → <b>regra</b> (teorema ou algoritmo) → <b>conclusão</b>.'},
+ {t:'just',id:'j1',lv:3,ctx:'Exercício A.',g:'sqd',q:'O grafo admite circuito de Euler? E trajeto de Euler? Justifica.',
+  model:'<p>Graus: A = 3, B = 2, C = 3, D = 2.</p><p>O grafo é conexo e tem exatamente 2 vértices de grau ímpar (A e C).</p><p>Pelo teorema de Euler, <b>não admite circuito</b> de Euler, mas <b>admite trajeto</b> de Euler, que começa em A e acaba em C (ou ao contrário).</p>',
+  crit:[['Indica os graus de todos os vértices',4],['Refere que o grafo é conexo',2],['Identifica os 2 vértices ímpares (A e C)',2],['Conclui corretamente: sem circuito, com trajeto de A para C',4]]},
+ {t:'just',id:'j2',lv:3,ctx:'Exercício B.',q:'Pode existir um grafo cujos vértices tenham graus 4, 3, 3, 2 e 1? Justifica.',
+  model:'<p>Soma dos graus: 4 + 3 + 3 + 2 + 1 = 13.</p><p>Em qualquer grafo, soma dos graus = 2 × nº de arestas, por isso a soma é <b>sempre par</b>.</p><p>Como 13 é ímpar, esse grafo <b>não pode existir</b>.</p><p class="small">Outra forma: há 3 vértices de grau ímpar, e esse número tem de ser par.</p>',
+  crit:[['Calcula a soma dos graus (13)',3],['Refere que soma dos graus = 2 × arestas (logo, é par)',4],['Conclui que o grafo não existe',3]]},
+ {t:'just',id:'j3',lv:3,ctx:'Exercício C. Grafo G (o da Linha Turquesa).',g:'fich',q:'Euleriza o grafo G duplicando o menor número possível de arestas. Justifica.',
+  model:'<p>Graus: A = 2, B = 4, C = 3, D = 3, E = 4, F = 1, G = 1. Há 4 vértices ímpares: C, D, F e G.</p><p>F e G só estão ligados a B: duplico <b>B–F</b> e <b>B–G</b> (F e G ficam com 2, B fica com 6).</p><p>C e D são vizinhos: duplico <b>C–D</b> (ficam com 4).</p><p>Agora todos os graus são pares, com <b>3 arestas duplicadas</b>. Não dá com 2: cada cópia teria de ligar dois ímpares, e a única aresta entre ímpares é C–D.</p>',
+  crit:[['Indica os graus de todos os vértices',3],['Identifica os 4 vértices ímpares (C, D, F, G)',2],['Duplica só arestas que já existem: B–F, B–G e C–D',3],['Confirma que todos os graus ficam pares',2],['Explica porque 3 é o mínimo',2]]},
+ {t:'just',id:'j4',lv:3,ctx:'Exercício D. Carteiro chinês.',g:'post2',q:'O carteiro sai de A, percorre todas as ruas e volta a A. Calcula a distância mínima. Justifica.',
+  model:'<p>Graus: A = 2, B = 3, C = 2, D = 3. B e D são ímpares, por isso é preciso eulerizar.</p><p>Caminhos de B a D: B–D = 6; B–A–D = 2 + 3 = 5; B–C–D = 3 + 2 = 5.</p><p>O mais barato pesa <b>5</b> (por exemplo B–A–D): duplico essas arestas.</p><p>Soma de todas as ruas: 2 + 3 + 2 + 3 + 6 = 16.</p><p>Distância mínima: 16 + 5 = <b>21</b>.</p>',
+  crit:[['Indica os graus e os vértices ímpares (B e D)',3],['Compara os caminhos entre B e D (6, 5 e 5)',3],['Escolhe o caminho de menor peso (5)',2],['Soma todas as ruas (16)',2],['Conclui: 16 + 5 = 21',2]]},
+ {t:'just',id:'j5',lv:3,ctx:'Exercício E. Algoritmo de Fleury.',g:'bridge',q:'Aplica o algoritmo de Fleury a partir de C. Indica a ordem das arestas e explica porque se deixa C–D para mais tarde.',
+  model:'<p>C e D têm grau 3 (ímpares): há trajeto de Euler de C para D.</p><p>Ordem: 1. C–A, 2. A–B, 3. B–C, 4. C–D, 5. D–E, 6. E–F, 7. F–D.</p><p>No início, <b>C–D é uma ponte</b>. Se a atravessasse logo, não podia voltar ao triângulo ABC e ficavam arestas por usar.</p><p>Pelo algoritmo de Fleury, só se atravessa uma ponte quando não há alternativa.</p>',
+  crit:[['Começa em C (vértice ímpar)',2],['Escreve a ordem certa das 7 arestas',4],['Explica que C–D é uma ponte',2],['Refere a regra de Fleury (ponte só sem alternativa)',2]]},
+ {t:'just',id:'j6',lv:3,ctx:'Exercício F.',g:'star',q:'O grafo tem circuito de Hamilton? Justifica.',
+  model:'<p><b>Não.</b> A, B e C têm grau 1: só estão ligados a D.</p><p>Num circuito, cada vértice precisa de 2 arestas: uma para chegar e outra para sair.</p><p>Entrava-se em A e não havia por onde sair. Logo, não há circuito de Hamilton.</p>',
+  crit:[['Indica que A, B e C têm grau 1',3],['Refere que num circuito cada vértice precisa de 2 arestas',4],['Conclui que não há circuito de Hamilton',3]]},
+ {t:'just',id:'j7',lv:3,ctx:'Exercício G. Um vendedor sai de Lisboa (L), visita Porto (P), Coimbra (C) e Faro (F) e volta a Lisboa.',g:'tsp',q:'Aplica os mínimos sucessivos (vizinho mais próximo) a partir de L e compara com o método de todas as hipóteses. O que concluis?',
+  model:'<p><b>Mínimos sucessivos</b> a partir de L: L → C (205), C → P (120), P → F (553), F → L (278). Total: 205 + 120 + 553 + 278 = <b>1156 km</b>.</p><p><b>Todas as hipóteses</b> ((4 − 1)! ÷ 2 = 3 circuitos):</p><ul><li>L-P-C-F-L = 313 + 120 + 438 + 278 = 1149</li><li>L-P-F-C-L = 313 + 553 + 438 + 205 = 1509</li><li>L-C-P-F-L = 205 + 120 + 553 + 278 = 1156</li></ul><p>O melhor é L-P-C-F-L, com <b>1149 km</b>.</p><p>Conclusão: os mínimos sucessivos são rápidos, mas aqui <b>não deram o ótimo</b> (1156 &gt; 1149).</p>',
+  crit:[['Escreve o percurso do vizinho mais próximo (L-C-P-F-L)',3],['Calcula o total: 1156 km',2],['Calcula os 3 circuitos possíveis',4],['Indica o melhor: L-P-C-F-L, 1149 km',2],['Conclui que o método rápido não deu o ótimo',2]]},
+ {t:'just',id:'j8',lv:3,ctx:'Exercício H.',g:'k4',q:'O grafo é simples? É regular? É completo? Quantas arestas tem? Justifica.',
+  model:'<p><b>Simples</b>: não tem lacetes nem arestas paralelas.</p><p><b>Regular</b>: todos os vértices têm grau 3.</p><p><b>Completo</b>: é simples e cada par de vértices está ligado (é o K₄).</p><p><b>Arestas</b>: 4 × 3 ÷ 2 = 6 (ou soma dos graus: 12 ÷ 2 = 6).</p>',
+  crit:[['Simples, com a razão (sem lacetes nem arestas paralelas)',2],['Regular, com os graus (todos 3)',3],['Completo, com a razão (todos os pares ligados)',3],['6 arestas, com o cálculo',2]]},
 ]},
 {id:'wt',c:'--l7',name:'Linha Laranja',title:'Treino infinito (perguntas novas sempre)',hearts:3,gen:true,steps:[]}
 ];
@@ -402,7 +476,7 @@ function sheet(){
  <section style="--c:var(--l1)"><h3>Básico</h3><ul><li>Ordem = nº de vértices</li><li>Grau = nº de arestas que tocam no vértice (lacete conta 2)</li><li>Simples: sem lacetes nem arestas paralelas. Regular: todos com o mesmo grau</li><li>Soma dos graus = 2 × nº de arestas</li><li>Nº de vértices ímpares é sempre par</li><li>Kₙ: n(n−1)/2 arestas, cada vértice com grau n−1</li><li>Ponte: se a tirares, o grafo deixa de ser conexo</li><li>Trajeto: não repete arestas. Caminho: não repete vértices. Circuito: trajeto fechado</li></ul></section>
  <section style="--c:var(--l2)"><h3>Euler (todas as arestas)</h3><ul><li>Conexo + 0 ímpares → circuito euleriano</li><li>Conexo + 2 ímpares → trajeto euleriano (de um ímpar ao outro)</li><li>Mais de 2 ímpares → nenhum</li><li>Justifica sempre: "conexo" + lista dos graus + teorema de Euler</li></ul></section>
  <section style="--c:var(--l3)"><h3>Fleury, eulerização, carteiro chinês</h3><ul><li>Fleury: apaga as arestas usadas; só atravessas uma ponte se não houver alternativa</li><li>Eulerizar: duplicar arestas existentes, nunca criar novas</li><li>Liga os ímpares aos pares pelo caminho de menor peso</li><li>Custo do carteiro = soma de todos os pesos + pesos duplicados</li></ul></section>
- <section style="--c:var(--l4)"><h3>Hamilton (todos os vértices)</h3><ul><li>Circuito que passa uma vez em cada vértice e volta ao início</li><li>Kₙ: (n−1)! circuitos, ou (n−1)!/2 sem contar o sentido</li><li>Força bruta: ótimo garantido, mas lento</li><li>Mínimos sucessivos (vizinho mais próximo): rápido, nem sempre ótimo</li><li>Ordenação dos pesos: da mais leve para a mais pesada; sem grau 3 nem circuitos antes do tempo</li></ul></section>
+ <section style="--c:var(--l4)"><h3>Hamilton (todos os vértices)</h3><ul><li>Circuito que passa uma vez em cada vértice e volta ao início</li><li>Percurso de Hamilton: todos os vértices uma vez, sem voltar ao início</li><li>Contar circuitos: esquema em árvore a partir do vértice inicial</li><li>Kₙ: (n−1)! circuitos, ou (n−1)!/2 sem contar o sentido</li><li>Força bruta: ótimo garantido, mas lento</li><li>Mínimos sucessivos (vizinho mais próximo): rápido, nem sempre ótimo</li><li>Ordenação dos pesos: da mais leve para a mais pesada; sem grau 3 nem circuitos antes do tempo</li></ul></section>
  </div>`;
 }
 function startWorld(i){if(W[i].gen)W[i].steps=makeTreino();S={view:'step',w:i,i:0,hearts:W[i].hearts||3,sub:{}};render();window.scrollTo(0,0)}
@@ -429,7 +503,7 @@ function stepScr(){
   const g=G[st.g];
   h+=`<h2>${st.q}</h2><div class="gwrap">${svgGraph(g,{tap:!sub.done,used:sub.used,cur:sub.path[sub.path.length-1],visited:sub.path,showDeg:st.mode==='euler'})}</div>
   <div class="pathline">${sub.path.length?sub.path.join(' → '):'<span class="small">Toca no vértice onde queres começar.</span>'}</div>
-  <div class="small">${st.mode==='euler'?`Arestas usadas: ${sub.used.length} de ${g.e.length}`:`Vértices visitados: ${new Set(sub.path).size} de ${Object.keys(g.v).length}`}</div>
+  <div class="small">${st.mode==='euler'?`Arestas usadas: ${sub.used.length} de ${g.e.length}`:`Vértices visitados: ${new Set(sub.path).size} de ${Object.keys(g.v).length}${st.end?` (termina em ${st.end})`:''}`}</div>
   ${sub.done?'':`<div class="row"><button class="btn ghost" data-act="undo">Desfazer</button><button class="btn ghost" data-act="clear">Recomeçar</button></div>`}${tipBtn()}${fb()}`;
  } else if(st.t==='eulerize'){
   sub.dups=sub.dups||[];
@@ -441,10 +515,25 @@ function stepScr(){
   const g=G[st.g];
   h+=`<h2>${st.q}</h2><div class="gwrap">${svgGraph(g,{tap:!sub.done,used:sub.used,cur:sub.path[sub.path.length-1],visited:sub.path})}</div>
   <div class="pathline">${sub.path.join(' → ')}</div>${sub.done?`<div class="big">Peso total: ${sub.total}</div>`:''}${tipBtn()}${fb()}`;
+ } else if(st.t==='just'){
+  // Justificação escrita: o aluno escreve, vê a resposta-modelo e conta os pontos (não tira vidas)
+  sub.crit=sub.crit||[];
+  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g])):''}
+  <label class="small" for="just-${st.id}">A tua resposta (escreve como no teste):</label>
+  <textarea class="ans" id="just-${st.id}" data-just="${st.id}" rows="6" placeholder="Escreve aqui a tua justificação…">${escTxt(justLoad(st.id))}</textarea>
+  ${sub.model?`<div class="model"><b>Resposta-modelo</b>${st.model}</div>
+  <div class="crits"><b>Marca o que escreveste:</b>${st.crit.map(([c,p],k)=>`<label class="crit"><input type="checkbox" data-crit="${k}"${sub.crit[k]?' checked':''}><span>${c}</span><b>${p} pts</b></label>`).join('')}</div>
+  <div class="big" id="score">${justScore(st)}</div>`:`<button class="btn ghost" data-act="model">Ver resposta-modelo</button>`}
+  <button class="btn next" data-act="next">Continuar</button>`;
  }
  h+='</div>';
  app.innerHTML=h;
 }
+/* Modo justificação: texto guardado no localStorage, pontos dos critérios */
+function justLoad(id){try{return localStorage.getItem(KEY+'-just-'+id)||''}catch(e){return ''}}
+function justSave(id,txt){try{localStorage.setItem(KEY+'-just-'+id,txt)}catch(e){}}
+function escTxt(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function justScore(st){const tot=st.crit.reduce((s,c)=>s+c[1],0),got=st.crit.reduce((s,c,k)=>s+(S.sub.crit[k]?c[1]:0),0);return `Terias ${got} de ${tot} pontos`}
 function bad(msg,cost){const sub=S.sub;sub.msg=msg;if(cost){S.hearts--;if(S.hearts<=0){S.view='over';return render()}}render();const c=document.getElementById('card');c&&c.classList.add('shake')}
 function good(){S.sub.done=true;S.sub.msg='';save.xp+=10;persist();render()}
 function stars3(){const m=W[S.w].hearts||3;return Math.max(1,Math.round(S.hearts/m*3))}
@@ -476,9 +565,17 @@ function tapVertex(v){
  }
  if(st.t==='trace'&&st.mode==='ham'){
   const n=Object.keys(g.v).length;
-  if(!cur){sub.path.push(v);sub.msg='';return render()}
+  if(!cur){if(st.start&&v!==st.start)return bad(`Neste exercício começa em ${st.start}.`);sub.path.push(v);sub.msg='';return render()}
   const idx=g.e.findIndex(([a,b])=>(a===cur&&b===v)||(b===cur&&a===v));
   if(idx<0)return bad(`${cur} e ${v} não estão ligados.`);
+  // Percurso de Hamilton (com "end"): não volta ao início, tem de acabar no vértice end
+  if(st.end){
+   if(sub.path.includes(v))return bad(`Já passaste em ${v}. No percurso de Hamilton cada vértice é visitado uma só vez.`);
+   if(v===st.end&&sub.path.length<n-1)return bad(`Chegaste a ${v} cedo demais: ainda há vértices por visitar. Tenta outro caminho.`);
+   sub.used.push(idx);sub.path.push(v);sub.msg='';
+   if(sub.path.length===n)return v===st.end?good():bad(`Visitaste todos, mas o percurso tem de acabar em ${st.end}. Desfaz e tenta outra ordem.`);
+   return render();
+  }
   if(v===sub.path[0]&&sub.path.length===n){sub.used.push(idx);sub.path.push(v);return good()}
   if(sub.path.includes(v))return bad(`Já passaste em ${v}. No circuito hamiltoniano cada vértice é visitado uma só vez${sub.path.length===n?'':' (exceto o regresso ao início, no fim)'}.`);
   sub.used.push(idx);sub.path.push(v);sub.msg='';
@@ -511,6 +608,7 @@ app.addEventListener('click',e=>{
  else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0};persist();render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
  else if(act==='next')next();
  else if(act==='hint'){sub.showHint=true;render()}
+ else if(act==='model'){sub.model=true;render()}
  else if(act==='undo'){if(sub.path.length){sub.path.pop();while(sub.used.length>Math.max(0,sub.path.length-1))sub.used.pop()}sub.msg='';render()}
  else if(act==='clear'){sub.path=[];sub.used=[];sub.msg='';render()}
  else if(act==='checkEul'){const st=W[S.w].steps[S.i],d=deg(G[st.g],sub.dups);const odd=Object.keys(d).filter(k=>d[k]%2);
@@ -518,6 +616,8 @@ app.addEventListener('click',e=>{
   if(sub.dups.length>st.min)return bad(`Funciona, mas usaste ${sub.dups.length} duplicações. Dá para fazer com ${st.min}.`);
   good()}
 });
+app.addEventListener('input',e=>{const t=e.target;if(t.dataset.just)justSave(t.dataset.just,t.value)});
+app.addEventListener('change',e=>{const t=e.target;if(t.dataset.crit==null)return;S.sub.crit[+t.dataset.crit]=t.checked;const sc=document.getElementById('score');if(sc)sc.textContent=justScore(W[S.w].steps[S.i])});
 app.addEventListener('submit',e=>{e.preventDefault();const st=W[S.w].steps[S.i];const inp=e.target.querySelector('input');const v=parseFloat(String(inp.value).replace(',','.'));S.sub.val=inp.value;if(isNaN(v))return bad('Escreve um número.');if(v===st.a)return good();bad(st.hint,true)});
 render();
 </script>
