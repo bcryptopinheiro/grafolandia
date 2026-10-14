@@ -140,6 +140,10 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 :root[data-theme="dark"]{--l8:#6f7c86}
 .metro::before{background:linear-gradient(var(--l1),var(--l2),var(--l3),var(--l4),var(--l6),var(--l5),var(--l8),var(--l7))}
 .gpair{display:grid;gap:8px;margin-top:8px}
+/* Botão ↺ para recomeçar cada linha */
+.strow{display:grid;grid-template-columns:1fr 44px;gap:4px;align-items:center}
+.streset{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:1.25rem;line-height:1}
+.stconfirm{position:relative;z-index:1;display:grid;gap:10px;background:var(--surface);border:2px solid var(--wc);border-radius:14px;padding:12px 14px;margin:0 0 6px;font-size:.95rem}
 .ans{width:100%;min-height:140px;resize:vertical;font:inherit;font-size:max(16px,1rem);line-height:1.45;padding:10px 12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
 .ans:focus-visible{outline:3px solid var(--wc);outline-offset:2px}
 .model{border:2px solid var(--wc);border-radius:12px;padding:10px 12px;font-size:.95rem;display:grid;gap:6px}
@@ -463,12 +467,16 @@ function home(){
  app.innerHTML=`<div class="hero"><h1>Grafo<span>lândia</span></h1>
  <p>Aprende a matéria e treina para o teste de MACS (11.º ano), estação a estação.</p>
  <div class="chips"><span class="chip">${dl>0?`Faltam ${dl} dias para o teste`:dl===0?'O teste é hoje!':'Teste: 16 out'}</span><span class="chip">${save.xp} XP</span><span class="chip">Manual pág. 6–48</span></div></div>
- <div class="metro">${W.map((w,i)=>`<button class="station" data-w="${i}" style="--c:var(${w.c})"><span class="dot">${i+1}</span>
+ <div class="metro">${W.map((w,i)=>`<div class="strow"><button class="station" data-w="${i}" style="--c:var(${w.c})"><span class="dot">${i+1}</span>
  <span><span class="st-name">${w.title}</span><span class="st-sub">${w.name} · ${w.gen?'10 perguntas novas de cada vez':w.steps.length+' paragens'}</span></span>
- <span class="stars">${starsHTML(save.stars[w.id]||0)}</span></button>`).join('')}</div>
+ <span class="stars">${starsHTML(save.stars[w.id]||0)}</span></button>${hasProgress(w)?`<button class="streset" data-reset="${i}" aria-label="Recomeçar a ${w.name}" title="Recomeçar esta linha">↺</button>`:'<span></span>'}</div>
+ ${S.confirm===i?`<div class="stconfirm" style="--wc:var(${w.c})"><span>Recomeçar a <b>${w.name}</b>? Perdes as estrelas desta linha${w.steps.some(s=>s.t==='just')?' e as respostas que escreveste':''}.</span><div class="row"><button class="btn" data-act="resetW" data-i="${i}">Sim, recomeçar</button><button class="btn ghost" data-act="cancelReset">Cancelar</button></div></div>`:''}`).join('')}</div>
  <div class="links"><button class="btn ghost" data-act="sheet">Ver a cábula</button><button class="btn ghost" data-act="reset">Recomeçar progresso</button></div>
  <p class="foot">Matéria: noções básicas de grafos, trajetos e circuitos eulerianos (carteiro chinês, Fleury, eulerização) e circuitos hamiltonianos.</p>`;
 }
+/* Recomeçar uma só linha: apaga as estrelas dela (e, na Linha Cinzenta, as respostas escritas) */
+function hasProgress(w){return !!save.stars[w.id]||w.steps.some(s=>s.t==='just'&&justLoad(s.id))}
+function resetWorld(w){delete save.stars[w.id];persist();w.steps.forEach(s=>{if(s.t==='just')try{localStorage.removeItem(KEY+'-just-'+s.id)}catch(e){}})}
 function sheet(){
  app.style.removeProperty('--wc');
  app.innerHTML=`<div class="top"><button class="back" data-act="home" aria-label="Voltar">←</button><h2>Cábula</h2><span></span></div>
@@ -599,13 +607,16 @@ app.addEventListener('click',e=>{
  const t=e.target;
  const vg=t.closest('[data-v]');if(vg&&S.view==='step'){return tapVertex(vg.dataset.v)}
  const ed=t.closest('[data-e]');if(ed&&S.view==='step'){const i=+ed.dataset.e,d=S.sub.dups;const k=d.indexOf(i);k<0?d.push(i):d.splice(k,1);S.sub.msg='';return render()}
+ const rs=t.closest('[data-reset]');if(rs){S={view:'home',confirm:+rs.dataset.reset};return render()}
  const ws=t.closest('[data-w]');if(ws)return startWorld(+ws.dataset.w);
  const op=t.closest('[data-opt]');if(op){const st=W[S.w].steps[S.i],k=+op.dataset.opt;if(k===st.a)return good();S.sub.tried.push(k);return bad(st.hint,true)}
  const a=t.closest('[data-act]');if(!a)return;
  const act=a.dataset.act,sub=S.sub;
  if(act==='home'){S={view:'home'};render();window.scrollTo(0,0)}
  else if(act==='sheet'){S={view:'sheet'};render();window.scrollTo(0,0)}
- else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0};persist();render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
+ else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0};W.forEach(resetWorld);render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
+ else if(act==='resetW'){resetWorld(W[+a.dataset.i]);S={view:'home'};render()}
+ else if(act==='cancelReset'){S={view:'home'};render()}
  else if(act==='next')next();
  else if(act==='hint'){sub.showHint=true;render()}
  else if(act==='model'){sub.model=true;render()}
