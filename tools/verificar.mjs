@@ -7,7 +7,7 @@ import vm from 'node:vm';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const code = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const fake = { style: { setProperty() {}, removeProperty() {} }, addEventListener() {}, set innerHTML(_) {} };
-const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {} }, window: { scrollTo() {} }, Math, Date, JSON, String, Object, Array, Set };
+const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
 vm.createContext(ctx);
 vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;', ctx);
 const G = ctx.__G, W = ctx.__W, deg = ctx.__deg;
