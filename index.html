@@ -157,6 +157,7 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 .top-step .back:disabled{opacity:.35;cursor:default}
 .top-step [data-act="prev"]{font-size:1.6rem;line-height:1}
 /* Botão ↺ para recomeçar cada linha */
+.cont{color:var(--c)}
 .strow{display:grid;grid-template-columns:1fr 44px;gap:4px;align-items:center}
 .streset{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:1.25rem;line-height:1}
 .stconfirm{position:relative;z-index:1;display:grid;gap:10px;background:var(--surface);border:2px solid var(--wc);border-radius:14px;padding:12px 14px;margin:0 0 6px;font-size:.95rem}
@@ -177,7 +178,7 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 
 <script>
 const KEY='grafolandia-macs11-v1';
-let save; try{save=JSON.parse(localStorage.getItem(KEY))}catch(e){} if(!save) save={stars:{},xp:0};
+let save; try{save=JSON.parse(localStorage.getItem(KEY))}catch(e){} if(!save) save={stars:{},xp:0}; if(!save.prog) save.prog={}; // prog: paragem, vidas e respostas de cada linha a meio
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
 
 /* ---------- GRAFOS ---------- */
@@ -568,6 +569,7 @@ function daysLeft(){const t=new Date(2026,9,16),n=new Date();n.setHours(0,0,0,0)
 function starsHTML(n){let s='';for(let i=0;i<3;i++)s+=i<n?'★':'<span class="off">★</span>';return s}
 
 function render(){
+ if(S.view==='step'&&S.subs)saveProg();
  if(S.view==='home')return home();
  if(S.view==='sheet')return sheet();
  if(S.view==='end')return endScr();
@@ -581,15 +583,15 @@ function home(){
  <p>Aprende a matéria e treina para o teste de MACS (11.º ano), estação a estação.</p>
  <div class="chips"><span class="chip">${dl>0?`Faltam ${dl} dias para o teste`:dl===0?'O teste é hoje!':'Teste: 16 out'}</span><span class="chip">${save.xp} XP</span><span class="chip">Manual pág. 6–48</span></div></div>
  <div class="metro">${W.map((w,i)=>`<div class="strow"><button class="station" data-w="${i}" style="--c:var(${w.c})"><span class="dot">${i+1}</span>
- <span><span class="st-name">${w.title}</span><span class="st-sub">${w.name} · ${w.gen?'10 perguntas novas de cada vez':w.steps.length+' paragens'}</span></span>
+ <span><span class="st-name">${w.title}</span><span class="st-sub">${w.name} · ${save.prog[w.id]?`<b class="cont">continua na paragem ${save.prog[w.id].i+1} de ${save.prog[w.id].n}</b>`:w.gen?'10 perguntas novas de cada vez':w.steps.length+' paragens'}</span></span>
  <span class="stars">${starsHTML(save.stars[w.id]||0)}</span></button>${hasProgress(w)?`<button class="streset" data-reset="${i}" aria-label="Recomeçar a ${w.name}" title="Recomeçar esta linha">↺</button>`:'<span></span>'}</div>
- ${S.confirm===i?`<div class="stconfirm" style="--wc:var(${w.c})"><span>Recomeçar a <b>${w.name}</b>? Perdes as estrelas desta linha${w.steps.some(s=>s.t==='just')?' e as respostas que escreveste':''}.</span><div class="row"><button class="btn" data-act="resetW" data-i="${i}">Sim, recomeçar</button><button class="btn ghost" data-act="cancelReset">Cancelar</button></div></div>`:''}`).join('')}</div>
+ ${S.confirm===i?`<div class="stconfirm" style="--wc:var(${w.c})"><span>Recomeçar a <b>${w.name}</b>? Perdes as estrelas e a paragem onde ias${w.steps.some(s=>s.t==='just')?', e as respostas que escreveste':''}.</span><div class="row"><button class="btn" data-act="resetW" data-i="${i}">Sim, recomeçar</button><button class="btn ghost" data-act="cancelReset">Cancelar</button></div></div>`:''}`).join('')}</div>
  <div class="links"><button class="btn ghost" data-act="sheet">Ver a cábula</button><button class="btn ghost" data-act="reset">Recomeçar progresso</button></div>
  <p class="foot">Matéria: noções básicas de grafos, trajetos e circuitos eulerianos (carteiro chinês, Fleury, eulerização) e circuitos hamiltonianos.</p>`;
 }
 /* Recomeçar uma só linha: apaga as estrelas dela (e, na Linha Cinzenta, as respostas escritas) */
-function hasProgress(w){return !!save.stars[w.id]||w.steps.some(s=>s.t==='just'&&justLoad(s.id))}
-function resetWorld(w){delete save.stars[w.id];persist();w.steps.forEach(s=>{if(s.t==='just')try{localStorage.removeItem(KEY+'-just-'+s.id)}catch(e){}})}
+function hasProgress(w){return !!save.stars[w.id]||!!save.prog[w.id]||w.steps.some(s=>s.t==='just'&&justLoad(s.id))}
+function resetWorld(w){delete save.stars[w.id];delete save.prog[w.id];persist();w.steps.forEach(s=>{if(s.t==='just')try{localStorage.removeItem(KEY+'-just-'+s.id)}catch(e){}})}
 function sheet(){
  app.style.removeProperty('--wc');
  app.innerHTML=`<div class="top"><button class="back" data-act="home" aria-label="Voltar">←</button><h2>Cábula</h2><span></span></div>
@@ -601,7 +603,18 @@ function sheet(){
  <section style="--c:var(--l10)"><h3>Digrafos (grafos orientados)</h3><ul><li>Arestas com sentido (setas) = arcos; segue sempre as setas</li><li>Grau de saída = setas que saem; grau de entrada = setas que chegam</li><li>Soma dos graus de saída = soma dos graus de entrada = nº de arcos</li><li>Preferências: começa pelas equipas com grau de saída 1</li><li>Tarefas: X → Y = Y só começa depois de X; tempo mínimo = caminho mais demorado</li></ul></section>
  </div>`;
 }
-function startWorld(i){if(W[i].gen)W[i].steps=makeTreino();S={view:'step',w:i,i:0,hearts:W[i].hearts||3,sub:{},subs:[],sid:Date.now()};S.subs[0]=S.sub;sess=S;nav({w:i,i:0,sid:S.sid});render();window.scrollTo(0,0)}
+/* Progresso de cada linha: guardado no telemóvel, para continuar onde ficaste ao voltar do mapa */
+function saveProg(){const w=W[S.w];save.prog[w.id]={i:S.i,hearts:S.hearts,subs:S.subs,ended:S.ended||0,n:w.steps.length,steps:w.gen?w.steps:undefined};persist()}
+function startWorld(i){
+ const w=W[i],p=save.prog[w.id];
+ if(p&&p.hearts>0&&p.i<p.n&&p.n===(w.gen?(p.steps||[]).length:w.steps.length)){ // continua onde ficou
+  if(w.gen)w.steps=p.steps;
+  S={view:'step',w:i,i:p.i,hearts:p.hearts,subs:p.subs||[],ended:p.ended,sid:Date.now(),base:p.i};
+ } else {
+  if(w.gen)w.steps=makeTreino();
+  S={view:'step',w:i,i:0,hearts:w.hearts||3,subs:[],sid:Date.now(),base:0};
+ }
+ S.sub=S.subs[S.i]||(S.subs[S.i]={});sess=S;nav({w:i,i:S.i,sid:S.sid});render();window.scrollTo(0,0)}
 
 /* Navegação: botão "‹" (paragem anterior) e botão/gesto "voltar" do telemóvel.
    Cada paragem fica no histórico do navegador; as respostas dadas ficam guardadas em S.subs. */
@@ -610,7 +623,8 @@ function nav(st){try{history.pushState(st,'')}catch(e){}}
 function prevStep(){
  if(S.view!=='step'||S.i<=0)return;
  const h=history.state;
- if(h&&h.sid===S.sid&&h.i===S.i)return history.back(); // o popstate trata do resto
+ if(S.i>S.base&&h&&h.sid===S.sid&&h.i===S.i)return history.back(); // o popstate trata do resto
+ S.base=S.i-1;try{history.replaceState({w:S.w,i:S.i-1,sid:S.sid},'')}catch(e){}
  showStep(S.i-1);
 }
 function showStep(i){S.i=i;S.view=i>=W[S.w].steps.length?'end':'step';S.sub=S.subs[i]||(S.subs[i]={});render();window.scrollTo(0,0)}
@@ -673,10 +687,10 @@ function justLoad(id){try{return localStorage.getItem(KEY+'-just-'+id)||''}catch
 function justSave(id,txt){try{localStorage.setItem(KEY+'-just-'+id,txt)}catch(e){}}
 function escTxt(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function justScore(st){const tot=st.crit.reduce((s,c)=>s+c[1],0),got=st.crit.reduce((s,c,k)=>s+(S.sub.crit[k]?c[1]:0),0);return `Terias ${got} de ${tot} pontos`}
-function bad(msg,cost){const sub=S.sub;sub.msg=msg;if(cost){S.hearts--;if(S.hearts<=0){S.view='over';return render()}}render();const c=document.getElementById('card');c&&c.classList.add('shake')}
+function bad(msg,cost){const sub=S.sub;sub.msg=msg;if(cost){S.hearts--;if(S.hearts<=0){S.view='over';delete save.prog[W[S.w].id];persist();return render()}}render();const c=document.getElementById('card');c&&c.classList.add('shake')}
 function good(){S.sub.done=true;S.sub.msg='';save.xp+=10;persist();render()}
 function stars3(){const m=W[S.w].hearts||3;return Math.max(1,Math.round(S.hearts/m*3))}
-function next(){const w=W[S.w];S.i++;S.sub=S.subs[S.i]||(S.subs[S.i]={});nav({w:S.w,i:S.i,sid:S.sid});if(S.i>=w.steps.length){S.view='end';if(!S.ended){S.ended=1;const prev=save.stars[w.id]||0;save.stars[w.id]=Math.max(prev,stars3());save.xp+=stars3()*10;persist()}}render();window.scrollTo(0,0)}
+function next(){const w=W[S.w];S.i++;S.sub=S.subs[S.i]||(S.subs[S.i]={});nav({w:S.w,i:S.i,sid:S.sid});if(S.i>=w.steps.length){S.view='end';delete save.prog[w.id];persist();if(!S.ended){S.ended=1;const prev=save.stars[w.id]||0;save.stars[w.id]=Math.max(prev,stars3());save.xp+=stars3()*10;persist()}}render();window.scrollTo(0,0)}
 function endScr(){
  const w=W[S.w];
  app.innerHTML=`<div class="end"><h1>${w.name} completa!</h1><div class="bigstars">${starsHTML(stars3())}</div><p>${S.hearts===(w.hearts||3)?'Sem erros. Estás pronto para esta parte!':stars3()>=2?'Muito bem! Revê o que falhaste e tenta as 3 estrelas.':'Conseguiste! Repete esta linha para fixar a matéria.'}</p>
@@ -747,7 +761,7 @@ app.addEventListener('click',e=>{
  if(act==='home'){if(S.view==='sheet'&&history.state&&history.state.v==='sheet')return history.back();S={view:'home'};nav({v:'home'});render();window.scrollTo(0,0)}
  else if(act==='sheet'){S={view:'sheet'};nav({v:'sheet'});render();window.scrollTo(0,0)}
  else if(act==='prev')prevStep();
- else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0};W.forEach(resetWorld);render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
+ else if(act==='reset'){if(a.dataset.sure){save={stars:{},xp:0,prog:{}};W.forEach(resetWorld);render()}else{a.dataset.sure=1;a.textContent='Tens a certeza? Toca outra vez'}}
  else if(act==='resetW'){resetWorld(W[+a.dataset.i]);S={view:'home'};render()}
  else if(act==='cancelReset'){S={view:'home'};render()}
  else if(act==='next')next();
