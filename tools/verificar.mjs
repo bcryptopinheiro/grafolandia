@@ -42,7 +42,7 @@ function segDist([px, py], [ax, ay], [bx, by]) {
 }
 
 console.log('\n— Desenhos: nenhuma aresta pode passar por cima de outro vértice —');
-for (const k of ['hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila']) {
+for (const k of ['hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
   const g = G[k], clash = [];
   for (const [a, b] of g.e) for (const [v, P] of Object.entries(g.v)) if (v !== a && v !== b) { const d = segDist(P, g.v[a], g.v[b]); if (d < 24) clash.push(`${a}–${b} passa a ${d.toFixed(0)} de ${v}`); }
   ok(!clash.length, `${k}: desenho limpo ${clash.join('; ')}`);
@@ -161,6 +161,38 @@ console.log('\n— Linha Castanha: exames nacionais (comparados com as resoluç�
   ok(key(r25.sel) === key(G.vilaSol.e) && r25.rej[0].slice(0, 2).sort().join('') === 'CE' && r25.total === step('Quantos metros tem o percurso fechado').a, `2025 F1: escolhidas ${r25.sel.map((e) => e[2]).join(', ')} = ${r25.total} m; 1.ª rejeitada E–C`);
   const ciclo = ['C', 'M', 'P', 'V', 'E', 'Q', 'C'];
   ok(ciclo.slice(1).every((x, i) => G.vilaSol.e.some(([a, b]) => (a === ciclo[i] && b === x) || (b === ciclo[i] && a === x))), '2025 F1: o percurso oficial C-M-P-V-E-Q-C usa as arestas escolhidas');
+}
+
+console.log('\n— Linha Azul-Escura: digrafos —');
+{
+  const io = (g) => { const d = {}; for (const k of Object.keys(g.v)) d[k] = { in: 0, out: 0 }; for (const [a, b] of g.e) { d[a].out++; d[b].in++; } return d; };
+  const d1 = io(G.dg1);
+  console.log('  dg1 (saída/entrada):', Object.entries(d1).map(([k, x]) => `${k}=${x.out}/${x.in}`).join(' '));
+  ok(G.dg1.e.length === step('Quantos arcos (setas)').a && d1.B.in === step('grau de entrada do vértice B').a && d1.A.out === step('grau de saída do vértice A').a, 'dg1: 5 arcos; entrada de B = 2; saída de A = 2');
+  const reach = (g, s) => { const seen = new Set([s]), st = [s]; while (st.length) { const u = st.pop(); for (const [a, b] of g.e) if (a === u && !seen.has(b)) { seen.add(b); st.push(b); } } return seen; };
+  ok(!reach(G.dg1, 'D').has('A'), 'dg1: seguindo as setas não se chega de D a A');
+  const arc = (g, a, b) => g.e.some(([x, y]) => x === a && y === b);
+  const isCirc = (g, p) => p.slice(1).every((x, i) => arc(g, p[i], x));
+  ok(isCirc(G.dg1, ['B', 'C', 'D', 'B']) && !isCirc(G.dg1, ['A', 'B', 'C', 'A']) && !isCirc(G.dg1, ['B', 'D', 'C', 'B']), 'dg1: só B → C → D → B é circuito orientado');
+  // Preferências: todas as atribuições possíveis (permutações)
+  const E = ['E1', 'E2', 'E3', 'E4', 'E5'], P = ['P1', 'P2', 'P3', 'P4', 'P5'], sols = [];
+  (function go(i, used, acc) { if (i === E.length) return sols.push(acc); for (const p of P) if (!used.has(p) && arc(G.pref, E[i], p)) go(i + 1, new Set([...used, p]), [...acc, `${E[i]}→${p}`]); })(0, new Set(), []);
+  console.log('  atribuições possíveis:', sols.map((s) => s.join(' ')).join(' | '));
+  const dp = io(G.pref);
+  ok(E.filter((e) => dp[e].out === 1).join() === 'E2,E5' && dp.P4.in === 2, 'pref: E2 e E5 com grau de saída 1; P4 com grau de entrada 2');
+  ok(sols.length === 1 && sols[0].includes('E3→P4') && G.prefSol.e.every(([a, b]) => sols[0].includes(`${a}→${b}`)), 'pref: solução única, com E3 → P4 (igual à resposta-modelo)');
+  // Tarefas: início mais cedo de cada tarefa = maior fim das que lhe chegam
+  function agenda(dur, prec) { const fim = {}, ini = {}; const f = (t) => { if (t in fim) return fim[t]; ini[t] = Math.max(0, ...(prec[t] || []).map(f)); return (fim[t] = ini[t] + dur[t]); }; Object.keys(dur).forEach(f); return { ini, fim, total: Math.max(...Object.values(fim)) }; }
+  const precOf = (g) => { const p = {}; for (const [a, b] of g.e) (p[b] = p[b] || []).push(a); return p; };
+  const durE = { T1: 2, T2: 3, T3: 1, T4: 4, T5: 1, T6: 4 }, pe = precOf(G.edgar), ag = agenda(durE, pe);
+  const antes = (t, s = new Set()) => { for (const x of pe[t] || []) { s.add(x); antes(x, s); } return s; };
+  console.log('  Edgar:', Object.keys(durE).map((t) => `${t} ${ag.ini[t]}–${ag.fim[t]}`).join(', '));
+  const simult = Object.keys(durE).filter((t) => ag.ini[t] === ag.ini.T2);
+  ok(antes('T5').size === 4 && ag.fim.T3 === 5 && simult.sort().join() === 'T2,T6' && ag.total === 6, `Edgar: I = ${antes('T5').size} tarefas, II = ${ag.fim.T3} dias, III = ${simult.join(' e ')}, IV = ${ag.total} dias (oficial: 4, 5, T2 e T6, 6)`);
+  const durA = { DB: 2, DP: 14, CB: 16, EP: 20, LC: 12, RA: 4, D: 0 }, aa = agenda(durA, precOf(G.aviao));
+  ok(aa.fim.D === step('antes da descolagem').a && G.aviao.e.every(([a, , w]) => w === durA[a]), `avião 2015: tempo mínimo ${aa.fim.D} min (oficial: 34); pesos dos arcos = duração da tarefa de origem`);
+  const durB = { T1: 3, T2: 10, T3: 15, T4: 12, T5: 15, T6: 5 }, pb = { T2: ['T1'], T3: ['T1'], T4: ['T2', 'T3'], T5: ['T2', 'T3'], T6: ['T4', 'T5'] };
+  ok(agenda(durB, pb).total === step('para fazer todas as tarefas?').a, `banca 2019: tempo mínimo ${agenda(durB, pb).total} min`);
 }
 
 console.log('\n— Coerência geral —');
