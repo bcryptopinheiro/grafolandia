@@ -42,7 +42,7 @@ function segDist([px, py], [ax, ay], [bx, by]) {
 }
 
 console.log('\n— Desenhos: nenhuma aresta pode passar por cima de outro vértice —');
-for (const k of ['hp', 'arv', 'iso1', 'iso2']) {
+for (const k of ['hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila']) {
   const g = G[k], clash = [];
   for (const [a, b] of g.e) for (const [v, P] of Object.entries(g.v)) if (v !== a && v !== b) { const d = segDist(P, g.v[a], g.v[b]); if (d < 24) clash.push(`${a}–${b} passa a ${d.toFixed(0)} de ${v}`); }
   ok(!clash.length, `${k}: desenho limpo ${clash.join('; ')}`);
@@ -114,6 +114,53 @@ console.log('\n— Linha Cinzenta (justificações) —');
   const J = W.find((l) => l.id === 'wj');
   ok(J && J.steps.filter((s) => s.t === 'just').length >= 8, `Linha Cinzenta tem ${J ? J.steps.filter((s) => s.t === 'just').length : 0} exercícios 'just'`);
   for (const s of (J ? J.steps : []).filter((s) => s.t === 'just')) console.log(`    ${s.id}: ${s.crit.length} critérios, ${s.crit.reduce((t, c) => t + c[1], 0)} pts`);
+}
+
+console.log('\n— Linha Castanha: exames nacionais (comparados com as resoluções oficiais do IAVE) —');
+{
+  const odd = (g) => Object.entries(deg(g)).filter(([, x]) => x % 2).map(([k]) => k);
+  // 2023 F2: mínimo de troços novos = nº de ímpares ÷ 2 (resposta oficial (B) 2)
+  const o23 = odd(G.ex23); console.log('  2023 F2 graus:', fmt(deg(G.ex23)));
+  const s23 = step('número mínimo de troços pedonais');
+  ok(o23.length / 2 === 2 && s23.opts[s23.a] === '2', `2023 F2: ímpares ${o23.join(', ')} → ${o23.length / 2} troços (oficial: 2)`);
+  // 2024 F1: peças → ímpares C e E; com CE fica tudo par (oficial: C e E)
+  const pecas = 'AB AC AE AF BC BD BE CD EF'.split(' ').map((p) => [p[0], p[1]]);
+  const key = (e) => e.map(([a, b]) => [a, b].sort().join('')).sort().join(',');
+  ok(key(G.dom.e) === key(pecas), 'dom: o grafo tem exatamente as 9 peças do enunciado');
+  ok(odd(G.dom).sort().join() === 'C,E' && !odd({ ...G.dom, e: [...G.dom.e, ['C', 'E']] }).length, `2024 F1: ímpares ${odd(G.dom).sort().join(' e ')}; com a peça CE todos ficam pares (oficial: C e E)`);
+  // 2024 F2: cartas — arestas geradas a partir das figuras e algarismos
+  const cartas = { A: ['o', 1], B: ['q', 1], C: ['t', 1], D: ['o', 2], E: ['t', 3], F: ['q', 4] };
+  const build = (cs) => { const k = Object.keys(cs), e = []; for (let i = 0; i < k.length; i++) for (let j = i + 1; j < k.length; j++) if (cs[k[i]][0] === cs[k[j]][0] || cs[k[i]][1] === cs[k[j]][1]) e.push([k[i], k[j]]); return { v: Object.fromEntries(k.map((x) => [x, 0])), e }; };
+  ok(key(G.cartas.e) === key(build(cartas).e), 'cartas: as arestas batem com as figuras e algarismos das cartas');
+  ok(key(G.cartasG.e) === key(build({ ...cartas, G: ['q', 3] }).e), 'cartasG: G = quadrado 3 liga-se a B, F e E');
+  const possiveis = [2, 3].filter((d) => hamPaths(build({ ...cartas, G: ['q', d] }), 'D').some((p) => p.slice(0, 3).join('') === 'DAB'));
+  const p3 = hamPaths(build({ ...cartas, G: ['q', 3] }), 'D').filter((p) => p.slice(0, 3).join('') === 'DAB').map((p) => p.join('-'));
+  ok(possiveis.join() === '3', `2024 F2: só o 3 dá empilhamento a começar por D, A, B → ${p3.join(' ou ')} (oficial: D-A-B-F-G-E-C ou D-A-B-C-E-G-F)`);
+  // 2018 F2: vizinho mais próximo sem voltar (oficial: Faial, Terceira, São Jorge, São Miguel, Pico; 331 €)
+  const hab = { 'Santa Maria': 5547, 'São Miguel': 137699, Terceira: 56062, Graciosa: 4393, 'São Jorge': 8998, Pico: 14144, Faial: 15038, Flores: 3791, Corvo: 430 };
+  ok(Object.values(hab).filter((x) => x >= 6000).length === step('Em quantas ilhas').a, 'Açores: 5 ilhas com pelo menos 6000 habitantes');
+  const g = G.acores, V = Object.keys(g.v), p = ['F'];
+  while (p.length < V.length) { const c = p.at(-1); p.push(V.filter((x) => !p.includes(x) && has(g, c, x)).sort((a, b) => w(g, c, a) - w(g, c, b))[0]); }
+  const custo = p.slice(1).reduce((t, x, i) => t + w(g, p[i], x), 0);
+  ok(p.join('') === 'FTJMP' && custo === 331, `2018 F2: ${p.join(' → ')} = ${custo} € (oficial: 331 €)`);
+  // Ordenação dos pesos (algoritmo genérico)
+  function ordenacao(gr) {
+    const E = [...gr.e].sort((a, b) => a[2] - b[2]), sel = [], rej = [], n = Object.keys(gr.v).length;
+    const comp = Object.fromEntries(Object.keys(gr.v).map((k) => [k, k])), find = (x) => (comp[x] === x ? x : (comp[x] = find(comp[x])));
+    const dg = Object.fromEntries(Object.keys(gr.v).map((k) => [k, 0]));
+    for (const e of E) { const [a, b] = e; const fecha = find(a) === find(b); if (dg[a] >= 2 || dg[b] >= 2 || (fecha && sel.length < n - 1)) { rej.push(e); continue; } sel.push(e); dg[a]++; dg[b]++; comp[find(a)] = find(b); if (sel.length === n) break; }
+    return { sel, rej, total: sel.reduce((t, e) => t + e[2], 0) };
+  }
+  // 2016 EE: tabela de distâncias (oficial: E3 – E5 – E4 – E1 – E2 – E3)
+  const tab = { E1: { E2: 166, E3: 206, E4: 125, E5: 287 }, E2: { E3: 151, E4: 264, E5: 169 }, E3: { E4: 207, E5: 109 }, E4: { E5: 309 } };
+  const ed = { v: { E1: 0, E2: 0, E3: 0, E4: 0, E5: 0 }, e: Object.entries(tab).flatMap(([a, r]) => Object.entries(r).map(([b, d]) => [a, b, d])) };
+  const r16 = ordenacao(ed);
+  ok(key(r16.sel) === key(G.edifSol.e) && r16.rej[0][2] === 169, `2016 EE: escolhidas ${r16.sel.map((e) => e[2]).join(', ')} (total ${r16.total} m); 1.ª rejeitada ${r16.rej[0][2]} (oficial: E3-E5-E4-E1-E2-E3)`);
+  // 2025 F1: Vilamoura (oficial: C-M-P-V-E-Q-C; distâncias em falta 350, 550, 1100, 1250, 1260)
+  const r25 = ordenacao(G.vila);
+  ok(key(r25.sel) === key(G.vilaSol.e) && r25.rej[0].slice(0, 2).sort().join('') === 'CE' && r25.total === step('Quantos metros tem o percurso fechado').a, `2025 F1: escolhidas ${r25.sel.map((e) => e[2]).join(', ')} = ${r25.total} m; 1.ª rejeitada E–C`);
+  const ciclo = ['C', 'M', 'P', 'V', 'E', 'Q', 'C'];
+  ok(ciclo.slice(1).every((x, i) => G.vilaSol.e.some(([a, b]) => (a === ciclo[i] && b === x) || (b === ciclo[i] && a === x))), '2025 F1: o percurso oficial C-M-P-V-E-Q-C usa as arestas escolhidas');
 }
 
 console.log('\n— Coerência geral —');
