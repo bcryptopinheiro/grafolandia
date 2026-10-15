@@ -54,10 +54,20 @@ function segDist([px, py], [ax, ay], [bx, by]) {
 }
 
 console.log('\n— Desenhos: nenhuma aresta pode passar por cima de outro vértice —');
-for (const k of ['quad2', 'hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
+for (const k of ['fila3', 'tri3', 'dois', 'ilha', 'quad2', 'hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
   const g = G[k], clash = [];
   for (const [a, b] of g.e) for (const [v, P] of Object.entries(g.v)) if (v !== a && v !== b) { const d = segDist(P, g.v[a], g.v[b]); if (d < 24) clash.push(`${a}–${b} passa a ${d.toFixed(0)} de ${v}`); }
   ok(!clash.length, `${k}: desenho limpo ${clash.join('; ')}`);
+}
+
+console.log('\n— Conexo e completo —');
+{
+  const conexo = (g) => { const V = Object.keys(g.v), seen = new Set([V[0]]), st = [V[0]]; while (st.length) { const u = st.pop(); for (const x of nb(g, u)) if (!seen.has(x)) { seen.add(x); st.push(x); } } return seen.size === V.length; };
+  const completo = (g) => { const V = Object.keys(g.v); return V.every((a, i) => V.slice(i + 1).every((b) => has(g, a, b))) && g.e.every(([a, b]) => a !== b) && new Set(g.e.map(([a, b]) => [a, b].sort().join())).size === g.e.length; };
+  const esperado = { fila3: [true, false], tri3: [true, true], dois: [false, false], sqd: [true, false], ilha: [false, false] };
+  for (const [k, [c, k2]] of Object.entries(esperado)) ok(conexo(G[k]) === c && completo(G[k]) === k2, `${k}: ${c ? 'conexo' : 'não conexo'}, ${k2 ? 'completo' : 'não completo'}`);
+  const s1 = step('Este grafo é…'), s2 = step('E este grafo?');
+  ok(s1.g === 'sqd' && s1.opts[s1.a].startsWith('Conexo, mas não completo') && s2.g === 'ilha' && s2.opts[s2.a] === 'Não é conexo', 'respostas das 2 perguntas novas certas');
 }
 
 console.log('\n— Grafo hp (percurso de Hamilton) —');

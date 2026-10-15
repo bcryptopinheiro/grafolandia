@@ -25,8 +25,18 @@ const LINHA_BASICO={id:'w1',c:'--l1',name:'Linha Azul',title:'Noções básicas 
  tip:'Para ver se é <b>regular</b>, escreve o grau de cada vértice: têm de ser todos iguais. Todo o grafo completo é regular, mas nem todo o regular é completo (um quadrado é regular de grau 2 e não é completo).'},
  {t:'mc',q:'O grafo do início (com o lacete em E) é…',g:'basic',opts:['Simples e regular','Não é simples, porque tem um lacete','Completo'],a:1,hint:'Procura lacetes ou arestas paralelas.',why:'Tem um lacete em E, por isso não é simples. Também não é regular: os graus são 2, 3, 2, 3 e 4.'},
  {t:'mc',q:'Um quadrado A–B–C–D–A (sem diagonais) é…',opts:['Regular, mas não completo','Completo','Nem regular nem completo'],a:0,hint:'Calcula os graus. Depois vê se A está ligado a C.',why:'Todos têm grau 2, por isso é regular. Não é completo: A e C não estão ligados.'},
- {t:'learn',title:'Conexo, completo e ponte',g:'bridge',body:`<ul><li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro (está tudo "num só bocado").</li>
- <li><b>Completo</b>: todos os vértices estão ligados a todos. Com n vértices chama-se <b>Kₙ</b>.</li>
+ {t:'learn',title:'Conexo ou completo?',body:`<p>As duas palavras parecem iguais, mas não são:</p>
+ <ul><li><b>Conexo</b> = está tudo <b>num só bocado</b>. Consegues ir de qualquer vértice a qualquer outro seguindo arestas, <b>mesmo passando por outros</b>. Não precisa de haver aresta direta.</li>
+ <li><b>Completo</b> = cada vértice tem uma <b>aresta direta</b> para <b>todos</b> os outros.</li></ul>
+ <div class="gwrap">${svgGraph(G.fila3)}</div><p class="small"><b>Conexo, mas não completo</b>: de A chega-se a C passando por B, mas falta a aresta A–C.</p>
+ <div class="gwrap">${svgGraph(G.tri3)}</div><p class="small"><b>Completo (e conexo)</b>: todos ligados diretamente a todos. É o K₃.</p>
+ <div class="gwrap">${svgGraph(G.dois)}</div><p class="small"><b>Não é conexo</b>: são dois bocados; de A não se chega a C.</p>
+ <div class="big">Todo o grafo completo é conexo,<br>mas nem todo o conexo é completo</div>`,
+ tip:'<b>Conexo?</b> Parte de um vértice e vê se chegas a todos. <b>Completo?</b> Cada vértice tem de ter grau n − 1 (ligado a todos os outros) e o grafo tem de ser simples.'},
+ {t:'mc',lv:1,g:'sqd',q:'Este grafo é…',opts:['Conexo, mas não completo','Completo','Não é conexo'],a:0,hint:'Consegues ir de qualquer vértice a qualquer outro? E há aresta direta entre B e D?',why:'É conexo: está tudo num só bocado. Não é completo: B e D não têm aresta direta (B tem grau 2, e num K₄ teria de ter grau 3).'},
+ {t:'mc',lv:1,g:'ilha',q:'E este grafo?',opts:['Não é conexo','Conexo, mas não completo','Completo'],a:0,hint:'Tenta ir de A até E seguindo as arestas.',why:'Não é conexo: o triângulo A, B, C e a aresta D–E são dois bocados separados. De A não se chega a D nem a E.'},
+ {t:'learn',title:'Conexo, completo e ponte',g:'bridge',body:`<ul><li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro, mesmo passando por outros (está tudo "num só bocado").</li>
+ <li><b>Completo</b>: há uma aresta direta entre cada par de vértices. Com n vértices chama-se <b>Kₙ</b>.</li>
  <li><b>Ponte</b>: aresta que, se a apagares, o grafo parte-se em dois. Aqui é a <b>C–D</b>.</li></ul>
  <div class="big">Kₙ tem n × (n − 1) ÷ 2 arestas</div>`,
  tip:'Para K₅: 5 × 4 ÷ 2 = 10 arestas. Cada vértice tem grau n − 1.'},
