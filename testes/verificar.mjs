@@ -11,7 +11,7 @@ const code = ficheiros.map((f) => readFileSync(new URL(f, raiz), 'utf8')).join('
 const fake = { style: { setProperty() {}, removeProperty() {} }, addEventListener() {}, set innerHTML(_) {} };
 const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
 vm.createContext(ctx);
-vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;', ctx);
+vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;globalThis.svgGraph=svgGraph;', ctx);
 const G = ctx.__G, W = ctx.__W, deg = ctx.__deg;
 
 let fails = 0;
@@ -215,6 +215,8 @@ console.log('\n— Coerência geral —');
     if (s.t === 'mc' && !(s.a >= 0 && s.a < s.opts.length)) bad.push(`mc sem resposta válida: ${s.q}`);
     if (s.t === 'trace' && s.mode === 'ham' && s.end) { const p = hamPaths(G[s.g], s.start).filter((x) => x.at(-1) === s.end); if (!p.length) bad.push(`percurso impossível: ${s.q}`); }
     if (s.t === 'just') { if (ids.has(s.id)) bad.push(`id repetido ${s.id}`); ids.add(s.id); }
+    // A pergunta não pode mostrar o grafo que a resposta pede para desenhar
+    if (s.t === 'just' && s.g && s.model.includes(ctx.svgGraph(G[s.g]))) bad.push(`${s.id}: o grafo da pergunta é igual ao da resposta-modelo`);
   }
   ok(!bad.length, `todos os passos apontam para grafos que existem e respostas válidas ${bad.join('; ')}`);
 }
