@@ -193,6 +193,8 @@ console.log('\n— Linha Azul-Escura: digrafos —');
   const dp = io(G.pref);
   ok(E.filter((e) => dp[e].out === 1).join() === 'E2,E5' && dp.P4.in === 2, 'pref: E2 e E5 com grau de saída 1; P4 com grau de entrada 2');
   ok(sols.length === 1 && sols[0].includes('E3→P4') && G.prefSol.e.every(([a, b]) => sols[0].includes(`${a}→${b}`)), 'pref: solução única, com E3 → P4 (igual à resposta-modelo)');
+  const usados = G.pref.e.map((e, i) => i).filter((i) => sols[0].includes(`${G.pref.e[i][0]}→${G.pref.e[i][1]}`));
+  ok(step('atribui um projeto diferente a cada equipa').model.includes(ctx.svgGraph(G.pref, { used: usados })), `j14: a resposta-modelo mostra as 9 setas e destaca as da solução (arcos ${usados.join(', ')})`);
   // Tarefas: início mais cedo de cada tarefa = maior fim das que lhe chegam
   function agenda(dur, prec) { const fim = {}, ini = {}; const f = (t) => { if (t in fim) return fim[t]; ini[t] = Math.max(0, ...(prec[t] || []).map(f)); return (fim[t] = ini[t] + dur[t]); }; Object.keys(dur).forEach(f); return { ini, fim, total: Math.max(...Object.values(fim)) }; }
   const precOf = (g) => { const p = {}; for (const [a, b] of g.e) (p[b] = p[b] || []).push(a); return p; };
