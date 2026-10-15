@@ -1,6 +1,6 @@
 /* Service worker da Grafolândia: guarda o jogo no telemóvel para funcionar sem internet.
    PARA PUBLICAR UMA ATUALIZAÇÃO: muda o número da versão abaixo (v1 → v2 → v3...). */
-const VERSION = 'v22';
+const VERSION = 'v23';
 const CACHE = `grafolandia-${VERSION}`;
 const FONTS = 'grafolandia-fonts'; // fontes do Google (guardadas à parte, não mudam)
 

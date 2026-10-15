@@ -8,7 +8,7 @@ const LINHA_EULER={id:'w2',c:'--l2',name:'Linha Verde',title:'Trajetos e circuit
  tip:'Euler = <b>carteiro</b>. Quer passar por <b>todas as ruas (arestas)</b> uma única vez.'},
  {t:'learn',title:'Trajeto, circuito e grafo euleriano',g:'quad2',body:`<ul><li><b>Trajeto de Euler</b> (trajeto euleriano): passa por <b>todas as arestas</b> do grafo, <b>uma só vez</b> cada.</li>
  <li><b>Circuito de Euler</b> (circuito euleriano): é um trajeto de Euler que <b>acaba no vértice onde começou</b>.</li></ul>
- <table class="tab inteiro"><tr><th></th><th>Todas as arestas, uma vez?</th><th>Volta ao início?</th></tr><tr><td><b>Trajeto de Euler</b></td><td>Sim</td><td>Não precisa</td></tr><tr><td><b>Circuito de Euler</b></td><td>Sim</td><td>Sim</td></tr></table>
+ <table class="tab"><tr><th></th><th>Todas as arestas uma vez</th><th>Volta ao início</th></tr><tr><td><b>Trajeto</b></td><td>Sim</td><td>Não precisa</td></tr><tr><td><b>Circuito</b></td><td>Sim</td><td>Sim</td></tr></table>
  <ul><li><b>Grafo euleriano</b>: grafo que tem um <b>circuito</b> de Euler.</li><li><b>Grafo semieuleriano</b>: tem um <b>trajeto</b> de Euler, mas não tem circuito.</li></ul>
  <p>Neste grafo dá para fazer A → B → C → E → F → G → C → D → A: usa as 8 arestas uma vez e volta a A. É um circuito de Euler, por isso o grafo é <b>euleriano</b>.</p>`,
  tip:'Nas arestas não se repete nada; nos vértices pode-se passar várias vezes (aqui passa-se duas vezes no C).'},
