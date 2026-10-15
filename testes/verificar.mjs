@@ -11,7 +11,7 @@ const code = ficheiros.map((f) => readFileSync(new URL(f, raiz), 'utf8')).join('
 const fake = { style: { setProperty() {}, removeProperty() {} }, addEventListener() {}, set innerHTML(_) {} };
 const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
 vm.createContext(ctx);
-vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;globalThis.svgGraph=svgGraph;globalThis.__EUL=EULER_SOL;', ctx);
+vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;globalThis.svgGraph=svgGraph;globalThis.__EUL=EULER_SOL;globalThis.__treino=makeTreino;', ctx);
 const G = ctx.__G, W = ctx.__W, deg = ctx.__deg;
 
 let fails = 0;
@@ -263,6 +263,29 @@ console.log('\n— Linha Verde-Escura: fichas da professora —');
   ok(conexo(G.qa1) && !simples(G.qa1) && !completo && !regular, 'QA1 1.2: conexo V, completo F, simples F, regular F (como na solução da professora)');
   const caminho = (p) => p.slice(1).every((v, i) => has(G.qa1, p[i], v));
   ok(caminho(['A', 'E', 'F', 'D']) && caminho(['A', 'G', 'C', 'D']) && odd(G.qa1).join() === 'A,C', 'QA1 1.3 e 1.5: os trajetos A-E-F-D e A-G-C-D existem; ímpares A e C → sem circuito euleriano');
+}
+
+console.log('\n— Treino infinito: 2000 rondas geradas ao acaso —');
+{
+  const f = (n) => (n <= 1 ? 1 : n * f(n - 1)); let n = 0; const erros = [];
+  const nums = (q) => (q.match(/graus ([\d, ]+)[.?]/) || [])[1]?.split(', ').map(Number);
+  for (let r = 0; r < 2000; r++) for (const q of ctx.__treino()) {
+    n++; const txt = q.q.replace(/<[^>]+>/g, '');
+    if (q.t === 'mc' && !(q.a >= 0 && q.a < q.opts.length)) erros.push('mc sem resposta: ' + txt);
+    if (q.t === 'num' && !Number.isInteger(q.a)) erros.push('resposta não inteira: ' + txt);
+    let m;
+    if ((m = txt.match(/arestas tem o grafo completo K(\d+)/))) { const k = +m[1]; if (q.a !== (k * (k - 1)) / 2) erros.push(txt); }
+    if ((m = txt.match(/\(sem contar o sentido\) tem K(\d+)/))) { const k = +m[1]; if (q.a !== f(k - 1) / 2) erros.push(txt); }
+    if ((m = txt.match(/\(contando os dois sentidos\) tem K(\d+)/))) { const k = +m[1]; if (q.a !== f(k - 1)) erros.push(txt); }
+    if (txt.startsWith('Um grafo conexo tem graus')) {
+      const l = nums(txt), soma = l.reduce((a, b) => a + b, 0), imp = l.filter((x) => x % 2).length;
+      if (soma % 2 || soma < 2 * (l.length - 1)) erros.push('grafo conexo impossível: ' + txt);
+      if (q.a !== (imp === 0 ? 0 : imp === 2 ? 1 : 2)) erros.push('regra de Euler errada: ' + txt);
+    }
+    if (txt.startsWith('Os vértices de um grafo têm graus')) { const l = nums(txt); if (q.a * 2 !== l.reduce((a, b) => a + b, 0)) erros.push(txt); }
+    if ((m = txt.match(/regular tem (\d+) vértices, todos de grau (\d+)/))) { const [v, g] = [+m[1], +m[2]]; if (g >= v || (v * g) % 2 || q.a !== (v * g) / 2) erros.push(txt); }
+  }
+  ok(!erros.length, `${n} perguntas geradas, todas certas e possíveis ${[...new Set(erros)].slice(0, 3).join(' | ')}`);
 }
 
 console.log('\n— Coerência geral —');

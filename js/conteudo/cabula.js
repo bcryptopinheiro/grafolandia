@@ -9,7 +9,7 @@ const CABULA=`
  <li><b>Grafo simples</b>: sem lacetes nem arestas paralelas. <b>Multigrafo</b>: não é simples (tem lacetes e/ou arestas paralelas)</li>
  <li><b>Grafo regular</b>: todos os vértices têm o mesmo grau</li>
  <li><b>Grafo completo (Kₙ)</b>: simples e cada vértice ligado a todos os outros. Tem n(n−1)/2 arestas e cada vértice tem grau n−1</li>
- <li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro. <b>Ponte</b>: aresta que, se a tirares, o grafo deixa de ser conexo</li>
+ <li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro, mesmo passando por outros (tudo num só bocado). <b>Ponte</b>: aresta que, se a tirares, o grafo deixa de ser conexo (parte-se em dois bocados)</li>
  <li><b>Soma dos graus = 2 × nº de arestas</b> (é sempre par). Por isso, o <b>número de vértices de grau ímpar é sempre par</b> (0, 2, 4…)</li>
  <li><b>Passeio</b>: arestas seguidas. <b>Trajeto</b>: não repete arestas. <b>Caminho</b>: não repete vértices. <b>Circuito</b>: trajeto que acaba onde começou</li>
  </ul></section>

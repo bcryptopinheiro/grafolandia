@@ -37,7 +37,7 @@ const LINHA_BASICO={id:'w1',c:'--l1',name:'Linha Azul',title:'Noções básicas 
  {t:'mc',lv:1,g:'ilha',q:'E este grafo?',opts:['Não é conexo','Conexo, mas não completo','Completo'],a:0,hint:'Tenta ir de A até E seguindo as arestas.',why:'Não é conexo: o triângulo A, B, C e a aresta D–E são dois bocados separados. De A não se chega a D nem a E.'},
  {t:'learn',title:'Conexo, completo e ponte',g:'bridge',body:`<ul><li><b>Conexo</b>: dá para ir de qualquer vértice a qualquer outro, mesmo passando por outros (está tudo "num só bocado").</li>
  <li><b>Completo</b>: há uma aresta direta entre cada par de vértices. Com n vértices chama-se <b>Kₙ</b>.</li>
- <li><b>Ponte</b>: aresta que, se a apagares, o grafo parte-se em dois. Aqui é a <b>C–D</b>.</li></ul>
+ <li><b>Ponte</b>: aresta que, se a apagares, o grafo deixa de ser conexo (parte-se em dois bocados). Aqui é a <b>C–D</b>.</li></ul>
  <div class="big">Kₙ tem n × (n − 1) ÷ 2 arestas</div>`,
  tip:'Para K₅: 5 × 4 ÷ 2 = 10 arestas. Cada vértice tem grau n − 1.'},
  {t:'mc',q:'Neste grafo, qual destas arestas é uma ponte?',g:'bridge',opts:['A–B','C–D','D–E','B–C'],a:1,hint:'Imagina que tiras a aresta. O grafo fica separado em dois bocados?',why:'Sem C–D, o triângulo ABC fica separado do triângulo DEF.'},
