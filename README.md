@@ -17,6 +17,7 @@ Site: https://bcryptopinheiro.github.io/grafolandia/
 | `js/conteudo/linha-3-fleury-carteiro.js` | Linha Amarela: Fleury, eulerização e carteiro chinês |
 | `js/conteudo/linha-4-hamilton.js` | Linha Rosa: Hamilton e caixeiro-viajante |
 | `js/conteudo/linha-5-digrafos.js` | Linha Azul-Escura: digrafos |
+| `js/conteudo/linha-5b-fichas-professora.js` | Linha Verde-Escura: exercícios das fichas da professora |
 | `js/conteudo/linha-6-tipo-teste.js` | Linha Turquesa: exercícios tipo teste |
 | `js/conteudo/linha-7-teste-relampago.js` | Linha Roxa: teste-relâmpago |
 | `js/conteudo/linha-8-justifica.js` | Linha Cinzenta: justifica como no teste |

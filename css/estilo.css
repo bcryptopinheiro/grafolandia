@@ -115,7 +115,7 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 :root{--l8:#5f6b75}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--l8:#6f7c86}}
 :root[data-theme="dark"]{--l8:#6f7c86}
-.metro::before{background:linear-gradient(var(--l1),var(--l2),var(--l3),var(--l4),var(--l10),var(--l6),var(--l5),var(--l8),var(--l9),var(--l7))}
+.metro::before{background:linear-gradient(var(--l1),var(--l2),var(--l3),var(--l4),var(--l10),var(--l11),var(--l6),var(--l5),var(--l8),var(--l9),var(--l7))}
 /* Linha Azul-Escura (digrafos) */
 :root{--l10:#2d3f8f}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--l10:#7385ec}}
@@ -149,3 +149,7 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 .crit b{white-space:nowrap;color:var(--wc);font-variant-numeric:tabular-nums}
 .tab.inteiro th,.tab.inteiro td{white-space:nowrap;text-align:left}
 .tab.inteiro th{white-space:normal}
+/* Linha Verde-Escura (fichas da professora) */
+:root{--l11:#2f6f3e}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--l11:#4fa866}}
+:root[data-theme="dark"]{--l11:#4fa866}

@@ -54,7 +54,7 @@ function segDist([px, py], [ax, ay], [bx, by]) {
 }
 
 console.log('\n— Desenhos: nenhuma aresta pode passar por cima de outro vértice —');
-for (const k of ['fila3', 'tri3', 'dois', 'ilha', 'quad2', 'hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
+for (const k of ['f1e21', 'f1e22', 'f1c3', 'qa1t', 'qa1', 'arm', 'prefs2', 'fila3', 'tri3', 'dois', 'ilha', 'quad2', 'hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
   const g = G[k], clash = [];
   for (const [a, b] of g.e) for (const [v, P] of Object.entries(g.v)) if (v !== a && v !== b) { const d = segDist(P, g.v[a], g.v[b]); if (d < 24) clash.push(`${a}–${b} passa a ${d.toFixed(0)} de ${v}`); }
   ok(!clash.length, `${k}: desenho limpo ${clash.join('; ')}`);
@@ -223,6 +223,46 @@ console.log('\n— Soluções de eulerização desenhadas (svgEuler) —');
 for (const { g, pares, d } of ctx.__EUL) {
   const nome = Object.keys(G).find((k) => G[k] === g), dd = deg(g, d);
   ok(d.every((i) => i >= 0) && Object.values(dd).every((x) => x % 2 === 0), `${nome}: repetir ${pares.map((p) => p.join('–')).join(', ')} → graus ${fmt(dd)}`);
+}
+
+console.log('\n— Linha Verde-Escura: fichas da professora —');
+{
+  const key = (E) => E.map(([a, b]) => [a, b].sort().join('')).sort().join(',');
+  const seqE = (t) => { const v = t.split(' '); return v.slice(1).map((x, i) => [v[i], x]); };
+  const odd = (g) => Object.entries(deg(g)).filter(([, x]) => x % 2).map(([k]) => k).sort();
+  const conexo = (g) => { const V = Object.keys(g.v), seen = new Set([V[0]]), st = [V[0]]; while (st.length) { const u = st.pop(); for (const x of nb(g, u)) if (!seen.has(x)) { seen.add(x); st.push(x); } } return seen.size === V.length; };
+  const simples = (g) => g.e.every(([a, b]) => a !== b) && new Set(g.e.map(([a, b]) => [a, b].sort().join())).size === g.e.length;
+  // Ficha 1, 2.1
+  ok(key(G.f1e21.e) === key([['M', 'N'], ['M', 'P'], ['M', 'Q'], ['N', 'P'], ['N', 'Q'], ['Q', 'Q']]) && deg(G.f1e21).Q === step('Qual é o grau do vértice Q?').a, `F1 2.1: adjacências do enunciado; graus ${fmt(deg(G.f1e21))}`);
+  // Ficha 1, 2.2
+  const d22 = deg(G.f1e22), pares = Object.values(d22).filter((x) => x % 2 === 0).length;
+  ok(Object.keys(G.f1e22.v).length === 5 && G.f1e22.e.length === 7 && conexo(G.f1e22) && !simples(G.f1e22) && pares === 3, `F1 2.2: 5 vértices, 7 arestas, conexo, não simples, ${pares} de grau par (${fmt(d22)})`);
+  // Ficha 1, 3
+  const c3 = seqE('C E D C B I F E A I G F D B H A G B C');
+  ok(key(G.f1c3.e) === key(c3) && Object.keys(G.f1c3.v).length === W.find((l) => l.id === 'wf').steps.find((x) => (x.ctx || '').startsWith('Ficha 1, ex. 3') && x.q === 'Qual é a ordem do grafo?').a && deg(G.f1c3).B === step('Qual é o grau do vértice B?').a && !odd(G.f1c3).length, `F1 3: o grafo tem as 18 arestas do circuito; ordem 9; B = 6; todos pares (${fmt(deg(G.f1c3))})`);
+  // Questão de aula 1, ex. 2
+  const t2 = seqE('T R S Q R P T Q P Q O S R');
+  ok(key(G.qa1t.e) === key(t2) && odd(G.qa1t).join() === 'R,T' && Object.keys(G.qa1t.v).length === W.find((l) => l.id === 'wf').steps.find((x) => (x.ctx || '').startsWith('Questão de aula 1, ex. 2') && x.q === 'Qual é a ordem do grafo?').a, `QA1 2: o grafo tem as 12 arestas do trajeto; ordem 6; ímpares T e R (${fmt(deg(G.qa1t))})`);
+  // Ficha 2, 1
+  const L = { X: 'YWV', Y: 'XZVU', Z: 'YW', W: 'XZV', V: 'XYWT', U: 'YT', T: 'UV' }, EA = [];
+  for (const a in L) for (const b of L[a]) if (a < b) EA.push([a, b]);
+  const tr = 'X Y Z W X V Y U T V W'.split(' '), left = G.arm.e.map((x) => x.slice());
+  const trOk = tr.slice(1).every((v, i) => { const k = left.findIndex(([a, b]) => (a === tr[i] && b === v) || (b === tr[i] && a === v)); if (k < 0) return false; left.splice(k, 1); return true; });
+  ok(key(G.arm.e) === key(EA) && odd(G.arm).join() === 'W,X' && step('Quantos armazéns têm grau ímpar?').a === 2 && trOk && !left.length, 'F2 1: estradas do enunciado; ímpares X e W; o trajeto do truque usa as 10 estradas');
+  // Ficha 2, 2
+  const P = { E1: ['P1', 'P3', 'P4'], E2: ['P2', 'P5'], E3: ['P1', 'P2', 'P4'], E4: ['P3', 'P5'], E5: ['P1', 'P2', 'P3'] };
+  const arcos = Object.entries(P).flatMap(([e, l]) => l.map((p) => [e, p]));
+  const sols = []; (function go(i, used, acc) { const K = Object.keys(P); if (i === K.length) return sols.push(acc); for (const p of P[K[i]]) if (!used.includes(p)) go(i + 1, [...used, p], [...acc, `${K[i]}→${p}`]); })(0, [], []);
+  const escolhidos = [2, 3, 5, 9, 12].map((i) => `${G.prefs2.e[i][0]}→${G.prefs2.e[i][1]}`);
+  ok(G.prefs2.e.map((e) => e.join('→')).join() === arcos.map((e) => e.join('→')).join() && arcos.length === step('quantos arcos (setas) há?').a, 'F2 2: o digrafo tem os 13 arcos da tabela');
+  ok(sols.length === 6 && sols.some((s) => escolhidos.every((x) => s.includes(x))), `F2 2: 6 atribuições possíveis; a da resposta-modelo (${escolhidos.join(' ')}) é uma delas`);
+  // Questão de aula 1, ex. 1 — comparado com a solução da professora
+  const oficial = { A: 3, B: 2, C: 3, D: 2, E: 6, F: 4, G: 4 }, dq = deg(G.qa1);
+  ok(Object.entries(oficial).every(([k, v]) => dq[k] === v) && dq.E === step('Qual é o grau do vértice E?').a, `QA1 1.1: graus iguais aos da solução da professora (${fmt(dq)})`);
+  const regular = new Set(Object.values(dq)).size === 1, completo = Object.keys(G.qa1.v).every((a, i, V) => V.slice(i + 1).every((b) => has(G.qa1, a, b)));
+  ok(conexo(G.qa1) && !simples(G.qa1) && !completo && !regular, 'QA1 1.2: conexo V, completo F, simples F, regular F (como na solução da professora)');
+  const caminho = (p) => p.slice(1).every((v, i) => has(G.qa1, p[i], v));
+  ok(caminho(['A', 'E', 'F', 'D']) && caminho(['A', 'G', 'C', 'D']) && odd(G.qa1).join() === 'A,C', 'QA1 1.3 e 1.5: os trajetos A-E-F-D e A-G-C-D existem; ímpares A e C → sem circuito euleriano');
 }
 
 console.log('\n— Coerência geral —');
