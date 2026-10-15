@@ -1,13 +1,30 @@
 /* Service worker da Grafolândia: guarda o jogo no telemóvel para funcionar sem internet.
    PARA PUBLICAR UMA ATUALIZAÇÃO: muda o número da versão abaixo (v1 → v2 → v3...). */
-const VERSION = 'v9';
+const VERSION = 'v10';
 const CACHE = `grafolandia-${VERSION}`;
 const FONTS = 'grafolandia-fonts'; // fontes do Google (guardadas à parte, não mudam)
 
-// Ficheiros do próprio jogo, guardados logo na instalação
+// Ficheiros do próprio jogo, guardados logo na instalação.
+// ATENÇÃO: se criares um ficheiro novo em js/ ou css/, acrescenta-o também aqui (testes/verificar.mjs avisa).
 const FILES = [
   './',
   './index.html',
+  './css/estilo.css',
+  './js/conteudo/grafos.js',
+  './js/desenho.js',
+  './js/conteudo/linha-1-basico.js',
+  './js/conteudo/linha-2-euler.js',
+  './js/conteudo/linha-3-fleury-carteiro.js',
+  './js/conteudo/linha-4-hamilton.js',
+  './js/conteudo/linha-5-digrafos.js',
+  './js/conteudo/linha-6-tipo-teste.js',
+  './js/conteudo/linha-7-teste-relampago.js',
+  './js/conteudo/linha-8-justifica.js',
+  './js/conteudo/linha-9-exames-iave.js',
+  './js/conteudo/linha-10-treino.js',
+  './js/conteudo/mapa.js',
+  './js/conteudo/cabula.js',
+  './js/jogo.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -16,8 +33,19 @@ const FILES = [
   './icons/favicon-32.png',
 ];
 
+// Alguns servidores redirecionam index.html → ./ ; uma resposta "redirecionada" não pode abrir a página,
+// por isso guarda-se sempre uma cópia limpa.
+const limpa = (res) => (res.redirected ? res.blob().then((b) => new Response(b, { status: res.status, statusText: res.statusText, headers: res.headers })) : Promise.resolve(res));
+
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => Promise.all(FILES.map((f) => fetch(new Request(f, { cache: 'reload' })).then((res) => {
+        if (!res.ok) throw new Error(`Falha a guardar ${f}`);
+        return limpa(res).then((r) => c.put(f, r));
+      }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 // Apaga as caches de versões antigas
@@ -52,17 +80,15 @@ self.addEventListener('fetch', (e) => {
 
   if (url.origin !== location.origin) return;
 
-  // Página principal: tenta a internet primeiro (para apanhar atualizações),
-  // e se falhar usa a cópia guardada.
-  if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req)
-        .then((res) => { const copy = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', copy)); return res; })
-        .catch(() => caches.match('./index.html', { ignoreSearch: true }))
-    );
-    return;
-  }
-
-  // Restantes ficheiros (ícones, manifest): cache primeiro, internet se faltar
-  e.respondWith(caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req)));
+  // Ficheiros do jogo: tenta sempre a internet primeiro (assim o index.html, o CSS e os JS
+  // vêm todos da mesma versão) e guarda uma cópia; sem internet usa a cópia guardada.
+  const nav = req.mode === 'navigate';
+  const key = nav ? './' : req;
+  e.respondWith(
+    fetch(nav ? req.url : req, { cache: 'no-cache' })
+      .then((res) => { if (res.ok) { const copy = res.clone(); limpa(copy).then((r) => caches.open(CACHE).then((c) => c.put(key, r))); } return res; })
+      .catch(() => caches.match(key, { ignoreSearch: true })
+        .then((hit) => hit || (nav ? caches.match('./index.html', { ignoreSearch: true }) : undefined))
+        .then((hit) => hit || Response.error()))
+  );
 });

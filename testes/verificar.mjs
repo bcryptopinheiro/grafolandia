@@ -1,19 +1,31 @@
 // Verifica as contas dos grafos e das respostas da Grafolândia.
-// Uso:  node tools/verificar.mjs
-// Lê o index.html, corre o código do jogo (sem browser) e confirma graus, contagens e respostas.
-import { readFileSync } from 'node:fs';
+// Uso (na pasta do projeto):  node testes/verificar.mjs   (tem de acabar com «Tudo certo ✔»)
+// Lê os ficheiros pela ordem do index.html, corre o jogo (sem browser) e confirma graus, contagens e respostas.
+import { readFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
 
-const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-const code = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const raiz = new URL('../', import.meta.url);
+const html = readFileSync(new URL('index.html', raiz), 'utf8');
+const ficheiros = [...html.matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]);
+const code = ficheiros.map((f) => readFileSync(new URL(f, raiz), 'utf8')).join('\n');
 const fake = { style: { setProperty() {}, removeProperty() {} }, addEventListener() {}, set innerHTML(_) {} };
-const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
+const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
 vm.createContext(ctx);
 vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;', ctx);
 const G = ctx.__G, W = ctx.__W, deg = ctx.__deg;
 
 let fails = 0;
 const ok = (cond, msg) => { console.log(`${cond ? '✔' : '✘'} ${msg}`); if (!cond) fails++; };
+
+console.log('— Ficheiros —');
+{
+  const usados = [...html.matchAll(/<(?:script src|link rel="stylesheet" href)="((?:js|css)\/[^"]+)"/g)].map((m) => m[1]);
+  const sw = readFileSync(new URL('sw.js', raiz), 'utf8');
+  const faltam = usados.filter((f) => !existsSync(new URL(f, raiz)));
+  const semCache = usados.filter((f) => !sw.includes(`'./${f}'`));
+  ok(!faltam.length, `todos os ${usados.length} ficheiros do index.html existem ${faltam.join(', ')}`);
+  ok(!semCache.length, `todos estão na lista do sw.js (para funcionar offline) ${semCache.join(', ')}`);
+}
 const fmt = (d) => Object.entries(d).map(([k, v]) => `${k}=${v}`).join(' ');
 const nb = (g, x) => g.e.filter(([a, b]) => a === x || b === x).map(([a, b]) => (a === x ? b : a));
 const has = (g, x, y) => g.e.some(([a, b]) => (a === x && b === y) || (a === y && b === x));
