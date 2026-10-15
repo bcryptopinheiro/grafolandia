@@ -19,9 +19,11 @@ const LINHA_HAMILTON={id:'w4',c:'--l4',name:'Linha Rosa',title:'Circuitos hamilt
  {t:'num',lv:3,g:'arv',q:'Quantos caminhos diferentes há de A até D, passando por todos os vértices uma só vez?',a:2,hint:'Faz a árvore a partir de A e guarda só os ramos que acabam em D com os 5 vértices.',why:'São 2: A–B–C–E–D e A–E–C–B–D.'},
  {t:'num',lv:3,g:'arv',q:'Quantos circuitos de Hamilton diferentes (sem contar o sentido) começam e acabam em A?',a:4,hint:'Faz a árvore a partir de A. Conta os ramos com os 5 vértices que voltam a A e divide por 2.',why:'A árvore dá 8 percursos que voltam a A. Cada circuito aparece nos dois sentidos: 8 ÷ 2 = 4. São A-B-C-D-E-A, A-B-D-C-E-A, A-B-D-E-C-A e A-C-B-D-E-A.'},
  {t:'mc',q:'Este grafo (estrela) tem circuito hamiltoniano?',g:'star',opts:['Sim','Não: para sair de A, B ou C terias de voltar a passar no D'],a:1,hint:'A, B e C só estão ligados a D.',why:'Vértices de grau 1 nunca podem estar num circuito: entras e não tens por onde sair.'},
- {t:'learn',title:'Quantos circuitos há em Kₙ?',body:`<p>Num grafo completo há sempre circuitos hamiltonianos. Fixando o vértice de partida:</p>
+ {t:'learn',title:'Quantos circuitos há em Kₙ?',body:`<p>Primeiro, o sinal <b>!</b> (lê-se «fatorial»): multiplica o número por todos os inteiros abaixo dele, até 1.</p>
+ <div class="big">3! = 3 × 2 × 1 = 6<br>4! = 4 × 3 × 2 × 1 = 24<br>5! = 5 × 4 × 3 × 2 × 1 = 120</div>
+ <p>Num grafo completo há sempre circuitos hamiltonianos. Fixando o vértice de partida:</p>
  <div class="big">(n − 1)! circuitos<br><span class="small">ou (n − 1)! ÷ 2 se não contarmos o sentido</span></div>
- <p>Exemplo K₄: 3! = 6 percursos, que são 3 circuitos diferentes (cada um feito nos dois sentidos).</p>`,
+ <p><b>Porquê?</b> No K₄ (A, B, C, D), começas em A. Para o 2.º vértice tens <b>3</b> escolhas, para o 3.º sobram <b>2</b>, para o último sobra <b>1</b>: 3 × 2 × 1 = 3! = 6 percursos. São 3 circuitos diferentes, cada um feito nos dois sentidos.</p>`,
  tip:'A-B-C-D-A e A-D-C-B-A são <b>o mesmo circuito</b>, ao contrário. Por isso se divide por 2. Lê bem o enunciado!'},
  {t:'num',q:'Quantos circuitos hamiltonianos diferentes (sem contar o sentido) tem K₅?',a:12,hint:'(n − 1)! ÷ 2 com n = 5. Lembra-te: 4! = 4×3×2×1.',why:'4! = 24, e 24 ÷ 2 = 12.'},
  {t:'learn',title:'O caixeiro-viajante e os algoritmos',g:'k5',body:`<p>Um grafo com números nas arestas chama-se <b>grafo pesado</b> (ou ponderado).</p>
