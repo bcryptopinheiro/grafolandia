@@ -21,7 +21,7 @@ function svgGraph(g,o={}){
   // Digrafo (g.dir): seta na ponta do arco, junto ao vértice de chegada
   if(g.dir&&!x.loop){const[P,Q]=[g.v[g.e[i][0]],g.v[g.e[i][1]]],L=Math.hypot(Q[0]-P[0],Q[1]-P[1]),ux=(Q[0]-P[0])/L,uy=(Q[1]-P[1])/L,tx=Q[0]-ux*18,ty=Q[1]-uy*18,bx=tx-ux*13,by=ty-uy*13;
    s+=`<polygon points="${tx},${ty} ${bx-uy*7},${by+ux*7} ${bx+uy*7},${by-ux*7}" fill="${cnt?'var(--wc)':'var(--edge)'}"/>`}
-  if(dups.includes(i)&&!x.loop){const c=`M${x.p[0]} ${x.p[1]} Q${x.mx+x.nx*26} ${x.my+x.ny*26} ${x.q[0]} ${x.q[1]}`;s+=`<path d="${c}" fill="none" stroke="var(--bad)" stroke-width="4" stroke-dasharray="7 6" stroke-linecap="round"/>`}
+  if(dups.includes(i)&&!x.loop){/* aresta repetida: se já houver arestas paralelas, desenha-se por fora delas */const k=[g.e[i][0],g.e[i][1]].sort().join(),par=g.e.filter(([a,b])=>[a,b].sort().join()===k).length,co=par>1?2*(17*(par-1)+16):26;const c=`M${x.p[0]} ${x.p[1]} Q${x.mx+x.nx*co} ${x.my+x.ny*co} ${x.q[0]} ${x.q[1]}`;s+=`<path d="${c}" fill="none" stroke="var(--bad)" stroke-width="4" stroke-dasharray="7 6" stroke-linecap="round"/>`}
   if(o.edgeTap)s+=`<path d="${x.d}" fill="none" stroke="transparent" stroke-width="26" data-e="${i}" style="cursor:pointer"/>`;
  });
  gm.forEach((x,i)=>{const w=g.e[i][2];if(w!=null)s+=`<g pointer-events="none"><rect x="${x.lx-(5+String(w).length*4)}" y="${x.ly-11}" width="${10+String(w).length*8}" height="22" rx="7" fill="var(--surface)" stroke="var(--line)"/><text x="${x.lx}" y="${x.ly+5}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)" font-family="Figtree,sans-serif">${w}</text></g>`});
@@ -34,4 +34,14 @@ function svgGraph(g,o={}){
   s+='</g>';
  }
  return s+'</svg>';
+}
+
+/* Solução de uma eulerização em desenho: as arestas repetidas aparecem a tracejado e os graus
+   já atualizados (todos pares). pares = arestas a repetir, ex.: [['A','B'],['B','C']].
+   Cada uso fica registado em EULER_SOL para o testes/verificar.mjs confirmar que está certo. */
+const EULER_SOL=[];
+function svgEuler(g,pares){
+ const d=pares.map(([a,b])=>g.e.findIndex(([x,y])=>(x===a&&y===b)||(x===b&&y===a)));
+ EULER_SOL.push({g,pares,d});
+ return `<div class="gwrap">${svgGraph(g,{dups:d,showDeg:true})}</div><p class="small">A tracejado: as arestas repetidas. Os números são os graus depois de eulerizar (todos pares).</p>`;
 }

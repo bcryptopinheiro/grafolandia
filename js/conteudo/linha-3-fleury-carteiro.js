@@ -21,7 +21,7 @@ const LINHA_FLEURY={id:'w3',c:'--l3',name:'Linha Amarela',title:'Fleury, euleriz
  <li>2. Se não, euleriza da forma <b>mais barata</b>.</li>
  <li>3. Custo total = soma de todos os pesos + pesos das arestas duplicadas.</li></ul>`,
  tip:'Para ligar dois ímpares, compara os caminhos possíveis e escolhe o de <b>menor peso</b>, mesmo que tenha mais arestas.'},
- {t:'mc',q:'Neste grafo, A e C são ímpares. Qual é a eulerização mais barata?',g:'post',opts:['Duplicar A–C (peso 5)','Duplicar A–B e B–C (peso 7)','Duplicar A–D e D–C (peso 7)'],a:0,hint:'Soma os pesos de cada opção.',why:'A–C direto custa 5, menos que 3+4 = 7 ou 4+3 = 7.'},
- {t:'num',q:'Qual é o custo total do percurso ótimo do carteiro?',g:'post',a:24,hint:'Soma todos os pesos (3+4+3+4+5) e junta o peso da aresta duplicada.',why:'19 (todas as ruas) + 5 (A–C repetida) = 24.'},
+ {t:'mc',q:'Neste grafo, A e C são ímpares. Qual é a eulerização mais barata?',g:'post',opts:['Duplicar A–C (peso 5)','Duplicar A–B e B–C (peso 7)','Duplicar A–D e D–C (peso 7)'],a:0,hint:'Soma os pesos de cada opção.',why:`A–C direto custa 5, menos que 3+4 = 7 ou 4+3 = 7.${svgEuler(G.post,[['A','C']])}`},
+ {t:'num',q:'Qual é o custo total do percurso ótimo do carteiro?',g:'post',a:24,hint:'Soma todos os pesos (3+4+3+4+5) e junta o peso da aresta duplicada.',why:`19 (todas as ruas) + 5 (A–C repetida) = 24.${svgEuler(G.post,[['A','C']])}`},
  {t:'mc',q:'Ao eulerizar um grafo, é permitido…',opts:['Acrescentar uma aresta entre dois vértices que não estavam ligados','Duplicar arestas já existentes','Apagar arestas'],a:1,hint:'O carteiro não pode construir estradas novas.',why:'Só duplicas arestas existentes: representam passar de novo numa rua que já existe.'},
 ]};

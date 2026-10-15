@@ -11,7 +11,7 @@ const code = ficheiros.map((f) => readFileSync(new URL(f, raiz), 'utf8')).join('
 const fake = { style: { setProperty() {}, removeProperty() {} }, addEventListener() {}, set innerHTML(_) {} };
 const ctx = { document: { getElementById: () => fake }, localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, window: { scrollTo() {} }, addEventListener() {}, history: { pushState() {}, replaceState() {}, back() {} }, Math, Date, JSON, String, Object, Array, Set };
 vm.createContext(ctx);
-vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;globalThis.svgGraph=svgGraph;', ctx);
+vm.runInContext(code + ';globalThis.__G=G;globalThis.__W=W;globalThis.__deg=deg;globalThis.svgGraph=svgGraph;globalThis.__EUL=EULER_SOL;', ctx);
 const G = ctx.__G, W = ctx.__W, deg = ctx.__deg;
 
 let fails = 0;
@@ -207,6 +207,12 @@ console.log('\n— Linha Azul-Escura: digrafos —');
   ok(aa.fim.D === step('antes da descolagem').a && G.aviao.e.every(([a, , w]) => w === durA[a]), `avião 2015: tempo mínimo ${aa.fim.D} min (oficial: 34); pesos dos arcos = duração da tarefa de origem`);
   const durB = { T1: 3, T2: 10, T3: 15, T4: 12, T5: 15, T6: 5 }, pb = { T2: ['T1'], T3: ['T1'], T4: ['T2', 'T3'], T5: ['T2', 'T3'], T6: ['T4', 'T5'] };
   ok(agenda(durB, pb).total === step('para fazer todas as tarefas?').a, `banca 2019: tempo mínimo ${agenda(durB, pb).total} min`);
+}
+
+console.log('\n— Soluções de eulerização desenhadas (svgEuler) —');
+for (const { g, pares, d } of ctx.__EUL) {
+  const nome = Object.keys(G).find((k) => G[k] === g), dd = deg(g, d);
+  ok(d.every((i) => i >= 0) && Object.values(dd).every((x) => x % 2 === 0), `${nome}: repetir ${pares.map((p) => p.join('–')).join(', ')} → graus ${fmt(dd)}`);
 }
 
 console.log('\n— Coerência geral —');
