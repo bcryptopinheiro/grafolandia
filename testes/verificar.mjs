@@ -54,7 +54,7 @@ function segDist([px, py], [ax, ay], [bx, by]) {
 }
 
 console.log('\n— Desenhos: nenhuma aresta pode passar por cima de outro vértice —');
-for (const k of ['hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
+for (const k of ['quad2', 'hp', 'arv', 'iso1', 'iso2', 'ex23', 'dom', 'cartas', 'cartasG', 'acores', 'edifSol', 'vila', 'dg1', 'pref', 'edgar', 'aviao']) {
   const g = G[k], clash = [];
   for (const [a, b] of g.e) for (const [v, P] of Object.entries(g.v)) if (v !== a && v !== b) { const d = segDist(P, g.v[a], g.v[b]); if (d < 24) clash.push(`${a}–${b} passa a ${d.toFixed(0)} de ${v}`); }
   ok(!clash.length, `${k}: desenho limpo ${clash.join('; ')}`);

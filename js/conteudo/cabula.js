@@ -15,6 +15,8 @@ const CABULA=`
  </ul></section>
  <section style="--c:var(--l2)"><h3>Euler (todas as arestas)</h3><ul>
  <li><b>Euler ou Hamilton?</b> Portas, ruas, pontes, estradas → arestas → Euler. Salas, cidades, lojas, locais → vértices → Hamilton</li>
+ <li><b>Trajeto de Euler</b>: passa por todas as arestas, uma só vez cada. <b>Circuito de Euler</b>: trajeto de Euler que acaba onde começou</li>
+ <li><b>Grafo euleriano</b>: tem circuito de Euler. <b>Grafo semieuleriano</b>: tem trajeto de Euler, mas não circuito</li>
  <li><b>Regra (formulário do exame)</b>: um grafo conexo admite circuitos de Euler se e só se todos os seus vértices forem de grau par</li>
  <li>Conexo + <b>0 ímpares</b> → circuito de Euler (<b>grafo euleriano</b>)</li>
  <li>Conexo + <b>2 ímpares</b> → trajeto de Euler, de um ímpar ao outro (<b>grafo semieuleriano</b>)</li>
