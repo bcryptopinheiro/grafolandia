@@ -111,7 +111,8 @@ function stepScr(){
   h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g])):''}
   <label class="small" for="just-${st.id}">A tua resposta (escreve como no teste):</label>
   <textarea class="ans" id="just-${st.id}" data-just="${st.id}" rows="6" placeholder="Escreve aqui a tua justificação…">${escTxt(justLoad(st.id))}</textarea>
-  ${sub.model?`<div class="model"><b>Resposta-modelo</b>${st.model}</div>
+  ${sub.model?`<button class="btn ghost" data-act="hideModel">Esconder resposta-modelo</button>
+  <div class="model"><b>Resposta-modelo</b>${st.model}</div>
   <div class="crits"><b>Marca o que escreveste:</b>${st.crit.map(([c,p],k)=>`<label class="crit"><input type="checkbox" data-crit="${k}"${sub.crit[k]?' checked':''}><span>${c}</span><b>${p} pts</b></label>`).join('')}</div>
   <div class="big" id="score">${justScore(st)}</div>`:`<button class="btn ghost" data-act="model">Ver resposta-modelo</button>`}
   <button class="btn next" data-act="next">Continuar</button>`;
@@ -204,6 +205,7 @@ app.addEventListener('click',e=>{
  else if(act==='next')next();
  else if(act==='hint'){sub.showHint=true;render()}
  else if(act==='model'){sub.model=true;render()}
+ else if(act==='hideModel'){sub.model=false;render()} // os critérios marcados ficam guardados em sub.crit
  else if(act==='undo'){if(sub.path.length){sub.path.pop();while(sub.used.length>Math.max(0,sub.path.length-1))sub.used.pop()}sub.msg='';render()}
  else if(act==='clear'){sub.path=[];sub.used=[];sub.msg='';render()}
  else if(act==='checkEul'){const st=W[S.w].steps[S.i],d=deg(G[st.g],sub.dups);const odd=Object.keys(d).filter(k=>d[k]%2);
