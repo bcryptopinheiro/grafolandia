@@ -23,8 +23,11 @@ const LINHA_HAMILTON={id:'w4',c:'--l4',name:'Linha Rosa',title:'Circuitos hamilt
  <div class="big">3! = 3 × 2 × 1 = 6<br>4! = 4 × 3 × 2 × 1 = 24<br>5! = 5 × 4 × 3 × 2 × 1 = 120</div>
  <p>Num grafo completo há sempre circuitos hamiltonianos. Fixando o vértice de partida:</p>
  <div class="big">(n − 1)! circuitos<br><span class="small">ou (n − 1)! ÷ 2 se não contarmos o sentido</span></div>
- <p><b>Porquê?</b> No K₄ (A, B, C, D), começas em A. Para o 2.º vértice tens <b>3</b> escolhas, para o 3.º sobram <b>2</b>, para o último sobra <b>1</b>: 3 × 2 × 1 = 3! = 6 percursos. São 3 circuitos diferentes, cada um feito nos dois sentidos.</p>`,
- tip:'A-B-C-D-A e A-D-C-B-A são <b>o mesmo circuito</b>, ao contrário. Por isso se divide por 2. Lê bem o enunciado!'},
+ <p><b>Porquê?</b> No K₄ (A, B, C, D), começas em A. Para o 2.º vértice tens <b>3</b> escolhas, para o 3.º sobram <b>2</b>, para o último sobra <b>1</b>: 3 × 2 × 1 = 3! = 6 percursos.</p>
+ <p><b>«Sem contar o sentido»</b> quer dizer que fazer o circuito para um lado ou para o outro (como dar a volta a uma rotunda pela direita ou pela esquerda) conta como <b>o mesmo</b>. Os 6 percursos do K₄ formam 3 pares:</p>
+ <table class="tab inteiro"><tr><th>Percurso</th><th>O mesmo, ao contrário</th></tr><tr><td>A-B-C-D-A</td><td>A-D-C-B-A</td></tr><tr><td>A-B-D-C-A</td><td>A-C-D-B-A</td></tr><tr><td>A-C-B-D-A</td><td>A-D-B-C-A</td></tr></table>
+ <p>Contando o sentido: 6 = (n − 1)!. Sem contar o sentido: 6 ÷ 2 = 3 = (n − 1)! ÷ 2.</p>`,
+ tip:'Lê bem o enunciado: «circuitos diferentes» ou «sem contar o sentido» → divide por 2. Se pede todos os percursos possíveis (nos dois sentidos), não dividas.'},
  {t:'num',q:'Quantos circuitos hamiltonianos diferentes (sem contar o sentido) tem K₅?',a:12,hint:'(n − 1)! ÷ 2 com n = 5. Lembra-te: 4! = 4×3×2×1.',why:'4! = 24, e 24 ÷ 2 = 12.'},
  {t:'learn',title:'O caixeiro-viajante e os algoritmos',g:'k5',body:`<p>Um grafo com números nas arestas chama-se <b>grafo pesado</b> (ou ponderado).</p>
  <p>Com pesos nas arestas, queremos o circuito hamiltoniano <b>mais barato</b>: é o <b>problema do caixeiro-viajante</b>.</p>
