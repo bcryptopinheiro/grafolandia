@@ -6,6 +6,7 @@ const LINHA_EXAMES={id:'wn',c:'--l9',name:'Linha Castanha',title:'Exames naciona
  {t:'learn',title:'Perguntas de exames nacionais',body:`<p>Estas perguntas vêm dos <b>exames nacionais de MACS</b> (prova 835, do IAVE). Algumas foram adaptadas para o jogo. Nas justificações, os pontos são os dos <b>critérios oficiais</b>.</p>
  <p>No exame tens um formulário com esta regra:</p>
  <div class="big">Um grafo conexo admite circuitos de Euler se e só se todos os seus vértices forem de grau par.</div>
+ <p>Atenção às palavras do exame: <b>«percurso fechado»</b> é um <b>circuito</b> (volta ao início).</p>
  <p>O exame <b>não diz o nome</b> dos algoritmos: descreve o método e tu tens de o reconhecer (vizinho mais próximo, ordenação dos pesos…).</p>`,
  tip:'Quando o exame diz <b>"Na sua resposta, apresente: − um grafo…"</b>, o grafo vale muitos pontos (às vezes 12 em 19). Desenha-o sempre!',
  exam:'<b>Fontes:</b> enunciados e critérios de classificação publicados em iave.pt (exames de 2016 a 2025).'},

@@ -148,3 +148,4 @@ body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px
 .crit input{width:22px;height:22px;margin:0;accent-color:var(--wc)}
 .crit b{white-space:nowrap;color:var(--wc);font-variant-numeric:tabular-nums}
 .tab.inteiro th,.tab.inteiro td{white-space:nowrap;text-align:left}
+.tab.inteiro th{white-space:normal}
