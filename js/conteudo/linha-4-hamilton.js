@@ -4,7 +4,8 @@
    ctx = enunciado; hint = truque; why = explicação. */
 const LINHA_HAMILTON={id:'w4',c:'--l4',name:'Linha Rosa',title:'Circuitos hamiltonianos',steps:[
  {t:'learn',title:'Hamilton: visitar todas as casas',g:'ham',body:`<p>Um <b>circuito hamiltoniano</b> passa por <b>todos os vértices exatamente uma vez</b> e volta ao início. Não precisa de usar todas as arestas!</p>
- <p>Um grafo com um circuito destes chama-se <b>grafo hamiltoniano</b>.</p>`,
+ <p>Um grafo com um circuito destes chama-se <b>grafo hamiltoniano</b>.</p>
+ <p>Atenção: para Hamilton <b>não há uma regra dos graus</b> como a de Euler. Para dizer que <b>há</b> circuito, apresenta um. Para dizer que <b>não há</b>, dá uma razão (por exemplo, um vértice de grau 1). Um grafo completo (com 3 ou mais vértices) tem sempre circuito de Hamilton.</p>`,
  tip:'<b>Euler = carteiro</b> (todas as RUAS). <b>Hamilton = turista</b> (todas as CIDADES, uma vez cada).'},
  {t:'trace',mode:'ham',g:'ham',q:'Encontra um circuito hamiltoniano: toca em cada vértice uma vez e volta ao primeiro.',hint:'O F tem de ficar "entre" dois dos vértices A, C ou D. Tenta A → B → C → F → D → E → A.',why:'Visitaste todos os vértices uma única vez e voltaste ao início.'},
  {t:'learn',title:'Percurso (caminho) de Hamilton',body:`<ul><li><b>Circuito (ou ciclo) de Hamilton</b>: passa por todos os vértices uma vez <b>e volta ao início</b>.</li>

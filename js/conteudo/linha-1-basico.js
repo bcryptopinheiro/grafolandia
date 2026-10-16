@@ -49,7 +49,7 @@ const LINHA_BASICO={id:'w1',c:'--l1',name:'Linha Azul',title:'Noções básicas 
  tip:'Pensa num passeio de bicicleta: trajeto = nunca passas duas vezes na mesma rua. Circuito = e ainda chegas a casa.'},
  {t:'mc',q:'Um trajeto que começa e termina no mesmo vértice chama-se…',opts:['Caminho fechado com arestas repetidas','Circuito','Ponte','Lacete'],a:1,hint:'É a palavra para um passeio que volta a casa.',why:'Circuito = trajeto fechado.'},
  {t:'learn',title:'Da tabela (ou da história) para o grafo',body:`<p>Muitas perguntas do teste dão uma <b>tabela</b> ou uma <b>história</b> em vez do desenho. Tu fazes o grafo:</p>
- <ul><li>Cada cidade, pessoa ou sala é um <b>vértice</b>.</li><li>Cada ligação (estrada, jogo, porta) é uma <b>aresta</b>.</li><li>Confirma no fim: <b>soma dos graus = 2 × nº de arestas</b>.</li></ul>
+ <ul><li>Cada cidade, pessoa ou sala é um <b>vértice</b>.</li><li>Cada ligação (estrada, jogo, porta) é uma <b>aresta</b>.</li><li>Numa <b>planta com portas</b>, cada espaço é um vértice, <b>incluindo o exterior</b> (pátio, rua, zona à volta) se houver portas para fora. Cada porta é uma aresta.</li><li>Confirma no fim: <b>soma dos graus = 2 × nº de arestas</b>.</li></ul>
  <p>Dois desenhos diferentes podem ser <b>o mesmo grafo</b>, se tiverem os mesmos pares ligados.</p>`,
  tip:'Num grafo só interessa <b>quem está ligado a quem</b>. A posição dos pontos e o tamanho das linhas não contam.'},
  {t:'num',lv:2,q:'Tabela de ligações: A liga a B, C e D. B liga a A e C. C liga a A, B e D. D liga a A e C. Quantas arestas tem o grafo?',a:5,hint:'Os graus são o número de ligações de cada um. Soma-os e divide por 2.',why:'Graus: 3 + 2 + 3 + 2 = 10, e 10 ÷ 2 = 5 arestas. Cada ligação aparece duas vezes na tabela (A–B e B–A).'},
