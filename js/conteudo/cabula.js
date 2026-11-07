@@ -46,6 +46,13 @@ const CABULA=`
  <li><b>Mínimos sucessivos (vizinho mais próximo)</b>: vai sempre para o mais perto ainda não visitado; rápido, nem sempre ótimo</li>
  <li><b>Ordenação dos pesos</b>: escolhe as arestas da mais leve para a mais pesada; rejeita as que deixam um vértice com grau 3 ou fecham um circuito antes de ter todos os vértices</li>
  </ul></section>
+ <section style="--c:var(--l10)"><h3>Digrafos (grafos orientados)</h3><ul>
+ <li><b>Digrafo</b>: as arestas têm sentido (setas) e chamam-se <b>arcos</b>; segue sempre as setas</li>
+ <li><b>Grau de saída</b> = setas que saem; <b>grau de entrada</b> = setas que chegam</li>
+ <li>Soma dos graus de saída = soma dos graus de entrada = nº de arcos</li>
+ <li><b>Preferências</b>: começa pelas equipas com menos escolhas (grau de saída 1) e risca esse projeto das outras; pode haver várias atribuições certas</li>
+ <li><b>Tarefas</b>: X → Y quer dizer que Y só começa depois de X; tempo mínimo = caminho mais demorado</li>
+ </ul></section>
  <section style="--c:var(--l13)"><h3>Coloração de grafos</h3><ul>
  <li>Vértices ligados têm de ter <b>cores diferentes</b>; tenta usar o menor número de cores (número cromático)</li>
  <li><b>Welsh–Powell</b>: ordena os vértices por grau decrescente; dá uma cor ao primeiro e aos seguintes que não estejam ligados a vértices dessa cor; repete com os que faltam</li>
@@ -73,12 +80,5 @@ const CABULA=`
  <li>Se começa em u(0): <b>u(n) = u(0) + nr</b>. Se começa em u(1): <b>u(n) = u(1) + (n − 1)r</b></li>
  <li><b>Soma</b>: S(n) = (u(1) + u(n)) × n ÷ 2</li>
  <li>Não confundas o valor num período, u(n), com o total acumulado, S(n)</li>
- </ul></section>
- <section style="--c:var(--l10)"><h3>Digrafos (grafos orientados)</h3><ul>
- <li><b>Digrafo</b>: as arestas têm sentido (setas) e chamam-se <b>arcos</b>; segue sempre as setas</li>
- <li><b>Grau de saída</b> = setas que saem; <b>grau de entrada</b> = setas que chegam</li>
- <li>Soma dos graus de saída = soma dos graus de entrada = nº de arcos</li>
- <li><b>Preferências</b>: começa pelas equipas com menos escolhas (grau de saída 1) e risca esse projeto das outras; pode haver várias atribuições certas</li>
- <li><b>Tarefas</b>: X → Y quer dizer que Y só começa depois de X; tempo mínimo = caminho mais demorado</li>
  </ul></section>
 `;

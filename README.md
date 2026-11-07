@@ -23,7 +23,7 @@ Site: https://bcryptopinheiro.github.io/grafolandia/
 | `js/conteudo/linha-8-justifica.js` | Linha Cinzenta: justifica como no teste |
 | `js/conteudo/linha-9-exames-iave.js` | Linha Castanha: exames nacionais (IAVE) |
 | `js/conteudo/linha-10-treino.js` | Linha Laranja: treino infinito (perguntas geradas) |
-| `js/conteudo/linha-11-materia-nova.js` | Novas linhas: ordenação do caixeiro-viajante, coloração, árvores mínimas, caminhos críticos e crescimento linear |
+| `js/conteudo/linha-11-materia-nova.js` | Novas linhas após digrafos: ordenação do caixeiro-viajante, coloração, árvores mínimas, caminhos críticos, crescimento linear e questão aula |
 | `js/conteudo/mapa.js` | A ordem das linhas no mapa |
 | `js/conteudo/cabula.js` | A cábula |
 | `js/desenho.js` | Como se desenha um grafo (SVG) |
