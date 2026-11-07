@@ -1,6 +1,6 @@
 /* Service worker da Grafolândia: guarda o jogo no telemóvel para funcionar sem internet.
    PARA PUBLICAR UMA ATUALIZAÇÃO: muda o número da versão abaixo (v1 → v2 → v3...). */
-const VERSION = 'v27';
+const VERSION = 'v28';
 const CACHE = `grafolandia-${VERSION}`;
 const FONTS = 'grafolandia-fonts'; // fontes do Google (guardadas à parte, não mudam)
 
@@ -11,6 +11,7 @@ const FILES = [
   './index.html',
   './css/estilo.css',
   './js/conteudo/grafos.js',
+  './js/conteudo/linha-11-materia-nova.js',
   './js/desenho.js',
   './js/conteudo/linha-1-basico.js',
   './js/conteudo/linha-2-euler.js',

@@ -1,6 +1,6 @@
 # Grafolândia
 
-Jogo de estudo de grafos de MACS (11.º ano): noções básicas, Euler, Fleury, carteiro chinês, Hamilton, caixeiro-viajante, digrafos e exames nacionais. HTML, CSS e JavaScript puro.
+Jogo de estudo de MACS (11.º ano): noções básicas, Euler, Fleury, carteiro chinês, Hamilton, caixeiro-viajante, coloração, árvores abrangentes mínimas, caminhos críticos, crescimento linear, digrafos e exames nacionais. HTML, CSS e JavaScript puro.
 Funciona como app (PWA): pode ser adicionado ao ecrã principal e funciona sem internet.
 
 Site: https://bcryptopinheiro.github.io/grafolandia/
@@ -23,6 +23,7 @@ Site: https://bcryptopinheiro.github.io/grafolandia/
 | `js/conteudo/linha-8-justifica.js` | Linha Cinzenta: justifica como no teste |
 | `js/conteudo/linha-9-exames-iave.js` | Linha Castanha: exames nacionais (IAVE) |
 | `js/conteudo/linha-10-treino.js` | Linha Laranja: treino infinito (perguntas geradas) |
+| `js/conteudo/linha-11-materia-nova.js` | Novas linhas: ordenação do caixeiro-viajante, coloração, árvores mínimas, caminhos críticos e crescimento linear |
 | `js/conteudo/mapa.js` | A ordem das linhas no mapa |
 | `js/conteudo/cabula.js` | A cábula |
 | `js/desenho.js` | Como se desenha um grafo (SVG) |
@@ -34,7 +35,7 @@ Site: https://bcryptopinheiro.github.io/grafolandia/
 ## Antes de publicar uma alteração
 
 1. Verificar o conteúdo: `node testes/verificar.mjs` (tem de acabar com «Tudo certo ✔»).
-2. No `sw.js`, subir a versão: `const VERSION = 'v10';` → `'v11'` (depois `'v12'`, etc.).
+2. No `sw.js`, subir a versão (`vN` → `vN+1`).
    Se criaste um ficheiro novo em `js/` ou `css/`, acrescenta-o também à lista `FILES` do `sw.js` (o passo 1 avisa).
 3. Commit e push:
    ```

@@ -46,6 +46,34 @@ const CABULA=`
  <li><b>Mínimos sucessivos (vizinho mais próximo)</b>: vai sempre para o mais perto ainda não visitado; rápido, nem sempre ótimo</li>
  <li><b>Ordenação dos pesos</b>: escolhe as arestas da mais leve para a mais pesada; rejeita as que deixam um vértice com grau 3 ou fecham um circuito antes de ter todos os vértices</li>
  </ul></section>
+ <section style="--c:var(--l13)"><h3>Coloração de grafos</h3><ul>
+ <li>Vértices ligados têm de ter <b>cores diferentes</b>; tenta usar o menor número de cores (número cromático)</li>
+ <li><b>Welsh–Powell</b>: ordena os vértices por grau decrescente; dá uma cor ao primeiro e aos seguintes que não estejam ligados a vértices dessa cor; repete com os que faltam</li>
+ <li>Um triângulo precisa de pelo menos 3 cores, porque cada vértice está ligado aos outros dois</li>
+ <li>Exemplo: exames incompatíveis → vértices são disciplinas, arestas são alunos em comum, cores são dias</li>
+ </ul></section>
+ <section style="--c:var(--l14)"><h3>Árvores abrangentes mínimas</h3><ul>
+ <li><b>Árvore</b>: grafo conexo sem circuitos. <b>Abrangente</b>: liga todos os vértices. <b>Mínima</b>: menor peso total</li>
+ <li>Com <b>n vértices</b>, uma árvore tem <b>n − 1 arestas</b></li>
+ <li><b>Kruskal</b>: ordena as arestas por peso crescente; escolhe cada uma salvo se criar um circuito; para em n − 1 arestas</li>
+ <li><b>Prim</b>: começa num vértice; escolhe a aresta mais leve que liga a árvore a um vértice de fora; repete até abranger todos</li>
+ <li>Kruskal cresce em vários bocados que se juntam; Prim cresce a partir de um só vértice</li>
+ <li>Ao contrário do caixeiro-viajante, a árvore não precisa de voltar ao início nem de formar um percurso</li>
+ </ul></section>
+ <section style="--c:var(--l15)"><h3>Caminhos críticos</h3><ul>
+ <li>O <b>caminho crítico</b> é o caminho mais longo no projeto; a duração dele é o tempo mínimo para concluir o projeto</li>
+ <li><b>Ida</b>: início mais cedo = maior fim das tarefas anteriores</li>
+ <li><b>Volta</b>: do fim para o início; usa o menor limite dado pelas tarefas seguintes</li>
+ <li><b>Folga</b> = início mais tarde − início mais cedo. Folga 0 = tarefa crítica</li>
+ <li>Atrasar uma tarefa crítica atrasa o projeto</li>
+ </ul></section>
+ <section style="--c:var(--l16)"><h3>Crescimento linear</h3><ul>
+ <li>Cresce ou diminui sempre o mesmo valor por período: a razão fixa é <b>r</b></li>
+ <li><b>Recorrência</b>: u(n + 1) = u(n) + r</li>
+ <li>Se começa em u(0): <b>u(n) = u(0) + nr</b>. Se começa em u(1): <b>u(n) = u(1) + (n − 1)r</b></li>
+ <li><b>Soma</b>: S(n) = (u(1) + u(n)) × n ÷ 2</li>
+ <li>Não confundas o valor num período, u(n), com o total acumulado, S(n)</li>
+ </ul></section>
  <section style="--c:var(--l10)"><h3>Digrafos (grafos orientados)</h3><ul>
  <li><b>Digrafo</b>: as arestas têm sentido (setas) e chamam-se <b>arcos</b>; segue sempre as setas</li>
  <li><b>Grau de saída</b> = setas que saem; <b>grau de entrada</b> = setas que chegam</li>

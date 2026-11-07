@@ -30,7 +30,7 @@ function home(){
  <span class="stars">${starsHTML(save.stars[w.id]||0)}</span></button>${hasProgress(w)?`<button class="streset" data-reset="${i}" aria-label="Recomeçar a ${w.name}" title="Recomeçar esta linha">↺</button>`:'<span></span>'}</div>
  ${S.confirm===i?`<div class="stconfirm" style="--wc:var(${w.c})"><span>Recomeçar a <b>${w.name}</b>? Perdes as estrelas e a paragem onde ias${w.steps.some(s=>s.t==='just')?', e as respostas que escreveste':''}.</span><div class="row"><button class="btn" data-act="resetW" data-i="${i}">Sim, recomeçar</button><button class="btn ghost" data-act="cancelReset">Cancelar</button></div></div>`:''}`).join('')}</div>
  <div class="links"><button class="btn ghost" data-act="sheet">Ver a cábula</button><button class="btn ghost" data-act="reset">Recomeçar progresso</button></div>
- <p class="foot">Matéria: noções básicas de grafos, trajetos e circuitos eulerianos (carteiro chinês, Fleury, eulerização) e circuitos hamiltonianos.</p>`;
+ <p class="foot">Matéria: grafos eulerianos e hamiltonianos, caixeiro-viajante, coloração, árvores abrangentes mínimas, caminhos críticos e crescimento linear.</p>`;
 }
 /* Recomeçar uma só linha: apaga as estrelas dela (e, na Linha Cinzenta, as respostas escritas) */
 function hasProgress(w){return !!save.stars[w.id]||!!save.prog[w.id]||w.steps.some(s=>s.t==='just'&&justLoad(s.id))}
