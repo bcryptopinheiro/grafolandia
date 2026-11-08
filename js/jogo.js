@@ -82,10 +82,10 @@ function stepScr(){
  const tipBtn=()=>st.hint&&!sub.done?(sub.showHint?`<div class="tip"><b>Truque</b>${st.hint}</div>`:`<button class="hintbtn" data-act="hint">Preciso de um truque</button>`):'';
  const fb=()=>sub.done?`<div class="fb ok"><b>Certo!</b>${st.why}</div><button class="btn next" data-act="next">Continuar</button>`:(sub.msg?`<div class="fb bad"><b>Ainda não…</b>${sub.msg}</div>`:'');
  if(st.t==='learn'){
-  h+=`<h2>${st.title}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}${st.body}${st.tip?`<div class="tip"><b>Truque</b>${st.tip}</div>`:''}${st.exam?`<div class="exam">${st.exam}</div>`:''}<button class="btn next" data-act="next">Percebi!</button>`;
+  h+=`<h2>${st.title}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg,vertexColors:st.vertexColors})):''}${st.body}${st.tip?`<div class="tip"><b>Truque</b>${st.tip}</div>`:''}${st.exam?`<div class="exam">${st.exam}</div>`:''}<button class="btn next" data-act="next">Percebi!</button>`;
  } else if(st.t==='mc'){
   sub.tried=sub.tried||[];
-  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}<div class="opts">${st.opts.map((o,k)=>{const c=sub.done&&k===st.a?'ok':sub.tried.includes(k)?'bad':'';return`<button class="opt ${c}" data-opt="${k}" ${sub.done||sub.tried.includes(k)?'disabled':''}>${o}</button>`}).join('')}</div>${tipBtn()}${fb()}`;
+  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg,vertexColors:st.vertexColors})):''}<div class="opts">${st.opts.map((o,k)=>{const c=sub.done&&k===st.a?'ok':sub.tried.includes(k)?'bad':'';return`<button class="opt ${c}" data-opt="${k}" ${sub.done||sub.tried.includes(k)?'disabled':''}>${o}</button>`}).join('')}</div>${tipBtn()}${fb()}`;
  } else if(st.t==='num'){
   h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{showDeg:st.showDeg})):''}<form class="row" data-form="num"><input class="num" id="num-${S.w}-${S.i}" type="number" inputmode="numeric" placeholder="A tua resposta" ${sub.done?'disabled':''} value="${sub.val??''}"><button class="btn" ${sub.done?'disabled':''}>Verificar</button></form>${tipBtn()}${fb()}`;
  } else if(st.t==='trace'){
@@ -108,7 +108,7 @@ function stepScr(){
  } else if(st.t==='just'){
   // Justificação escrita: o aluno escreve, vê a resposta-modelo e conta os pontos (não tira vidas)
   sub.crit=sub.crit||[];
-  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g])):''}
+  h+=`<h2>${st.q}</h2>${st.g?gfx(svgGraph(G[st.g],{vertexColors:st.vertexColors})):''}
   <label class="small" for="just-${st.id}">A tua resposta (escreve como no teste):</label>
   <textarea class="ans" id="just-${st.id}" data-just="${st.id}" rows="6" placeholder="Escreve aqui a tua justificação…">${escTxt(justLoad(st.id))}</textarea>
   ${sub.model?`<button class="btn ghost" data-act="hideModel">Esconder resposta-modelo</button>

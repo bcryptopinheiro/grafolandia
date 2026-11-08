@@ -27,9 +27,10 @@ function svgGraph(g,o={}){
  gm.forEach((x,i)=>{const w=g.e[i][2];if(w!=null)s+=`<g pointer-events="none"><rect x="${x.lx-(5+String(w).length*4)}" y="${x.ly-11}" width="${10+String(w).length*8}" height="22" rx="7" fill="var(--surface)" stroke="var(--line)"/><text x="${x.lx}" y="${x.ly+5}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)" font-family="Figtree,sans-serif">${w}</text></g>`});
  for(const[k,[x,y]]of Object.entries(g.v)){
   const cur=o.cur===k,vis=(o.visited||[]).includes(k);
+  const vc=o.vertexColors&&o.vertexColors[k]!=null?`var(--${o.vertexColors[k]})`:null;
   s+=`<g data-v="${k}" style="cursor:${o.tap?'pointer':'default'}"${o.edgeTap?' pointer-events="none"':''}><circle cx="${x}" cy="${y}" r="${o.tap?30:24}" fill="transparent"/>`+
-   `<circle cx="${x}" cy="${y}" r="16" fill="${cur?'var(--wc)':'var(--surface)'}" stroke="var(--wc)" stroke-width="${vis?5:3}"/>`+
-   `<text x="${x}" y="${y+6}" text-anchor="middle" font-size="16" font-weight="700" fill="${cur?'#fff':'var(--ink)'}" font-family="Fredoka,sans-serif">${k}</text>`;
+   `<circle cx="${x}" cy="${y}" r="16" fill="${cur?'var(--wc)':vc||'var(--surface)'}" stroke="${vc||'var(--wc)'}" stroke-width="${vis?5:3}"/>`+
+   `<text x="${x}" y="${y+6}" text-anchor="middle" font-size="16" font-weight="700" fill="${cur||vc?'#fff':'var(--ink)'}" font-family="Fredoka,sans-serif">${k}</text>`;
   if(d){const odd=d[k]%2;s+=`<circle cx="${x+17}" cy="${y-16}" r="10" fill="${odd?'var(--bad)':'var(--ok)'}"/><text x="${x+17}" y="${y-11.5}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Figtree,sans-serif">${d[k]}</text>`}
   s+='</g>';
  }
